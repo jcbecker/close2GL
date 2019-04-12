@@ -113,7 +113,6 @@ int main(){
 
 
     // Load, compile and link shaders 
-    Shader shaderObj("../assets/shaders/simple.vert", "../assets/shaders/simple.frag");
     Shader loadObjectShader("../assets/shaders/loadtest.vert", "../assets/shaders/loadtest.frag");
 
     bool drawCubeFlag = true;
@@ -375,9 +374,7 @@ int main(){
             // }
             ImGui::End();
         }
-
-
-        // Rendering
+        // Imgui Render Calls
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -390,7 +387,7 @@ int main(){
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    
+
     glDeleteVertexArrays(1, &cubeojb.VAO);
     glDeleteBuffers(1, &cubeojb.VBO);
     
