@@ -70,9 +70,9 @@ public:
             fscanf(fp, "material shine %f\n", &(afmf));
             shine.push_back(afmf);
 
-            std::cout << "teste: " << ambient[i].x << ",  " << ambient[i].y << ", " << ambient[i].z << ":\n";
-            std::cout << "teste: " << diffuse[i].x << ",  " << diffuse[i].y << ", " << diffuse[i].z << ":\n";
-            std::cout << "teste: " << specular[i].x << ",  " << specular[i].y << ", " << specular[i].z << ":\n";
+            // std::cout << "test: " << ambient[i].x << ",  " << ambient[i].y << ", " << ambient[i].z << ":\n";
+            // std::cout << "test: " << diffuse[i].x << ",  " << diffuse[i].y << ", " << diffuse[i].z << ":\n";
+            // std::cout << "test: " << specular[i].x << ",  " << specular[i].y << ", " << specular[i].z << ":\n";
         }
         fscanf(fp, "%c", &ch);
         while(ch!= '\n')  // skip documentation line
@@ -80,7 +80,6 @@ public:
         
 
         int firstrount = 1;
-        std::cout << "Triangulos para ler: " << nTriangles <<"\n";
         for (unsigned int i=0; i<nTriangles; i++){
             fscanf(fp, "v0 %f %f %f %f %f %f %d\n",
             &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
@@ -124,8 +123,8 @@ public:
             // Tris[i].Color[2] = (unsigned char)(int)(255*(diffuse[color_index[0]].z));
         }
 
-        std::cout << "minimos: (" << minx << ", " << miny << ", " << minz << ")\n";
-        std::cout << "maximos: (" << maxx << ", " << maxy << ", " << maxz << ")\n";
+        // std::cout << "min position values in axes (z, y, z): (" << minx << ", " << miny << ", " << minz << ")\n";
+        // std::cout << "max position values in axes (z, y, z): (" << maxx << ", " << maxy << ", " << maxz << ")\n";
 
         fclose(fp);
 
@@ -146,9 +145,9 @@ public:
         glEnableVertexAttribArray(1);
 
         glBindVertexArray(0);
-        std::cout << "maior: " << getMaxOffsetsize() << "\n";
+        // std::cout << "Bigger size Offset: " << getMaxOffsetsize() << "\n";
         
-        std::cout << "centro: (" << getCenterBBoxOCS().x << ", " << getCenterBBoxOCS().y << ", " << getCenterBBoxOCS().z << ")\n";
+        // std::cout << "Center of Mesh: (" << getCenterBBoxOCS().x << ", " << getCenterBBoxOCS().y << ", " << getCenterBBoxOCS().z << ")\n";
 
     }
 
@@ -171,9 +170,6 @@ public:
         float cbbz = (maxz + minz)/2;
         return glm::vec3(cbbx, cbby, cbbz);
     }
-
-    
-    
 };
 
 

@@ -86,7 +86,6 @@ int main(){
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
     glfwSetWindowUserPointer(window, &camera);
-    bool show_demo_window = true;
 
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
@@ -369,9 +368,6 @@ int main(){
                 }
                 ImGui::Unindent();
             }
-            // if (ImGui::Button("Close Me")){
-            //     showMainMenu = false;
-            // }
             ImGui::End();
         }
         // Imgui Render Calls
