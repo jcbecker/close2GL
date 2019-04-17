@@ -25,8 +25,7 @@ public:
     std::vector<glm::vec3> specular;
     std::vector<float> shine;
     std::vector<Vertex> vertices;
-    // std::vector<glm::vec3> normals;
-    // std::vector<int> colorIndexes;
+
     std::vector<glm::vec3> faceNormals;
 
     GLuint VAO, VBO;
@@ -140,7 +139,7 @@ public:
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Color attribute
+        // Normal attribute
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         glEnableVertexAttribArray(1);
 
