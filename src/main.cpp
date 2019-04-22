@@ -19,6 +19,7 @@
 
 #include "yaol.hpp"
 
+#include "LCRenderer.hpp"
 
 // Functions signatures
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -41,8 +42,6 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 int main(){
-    float znear = 1.0f, zfar = 3000.0f;
-
     std::cout << "Compiled against GLFW: " <<  GLFW_VERSION_MAJOR << "."
     << GLFW_VERSION_MINOR << "." << GLFW_VERSION_REVISION << "\n";
 
@@ -85,6 +84,8 @@ int main(){
     }
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    RendererLayer mRenderer = RendererLayer();
+    bool show_demo_window = true;
     glfwSetWindowUserPointer(window, &camera);
 
     // configure global opengl state
@@ -102,7 +103,7 @@ int main(){
 
     // Setup style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    // ImGui::StyleColorsClassic();
     // ImGui::StyleColorsLight();
 
     auto font_default = io.Fonts->AddFontDefault();
@@ -185,7 +186,7 @@ int main(){
         glm::mat4 projection    = glm::mat4(1.0f);
 
         glfwGetWindowSize(window, &cscr_w, &cscr_h);//essa função é threadsafe
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, znear, zfar);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
 
         view = camera.GetViewMatrix();
 
@@ -225,11 +226,11 @@ int main(){
         }
         
 
-        // if (show_demo_window)
-        // {
-        //     ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway. Here we just want to make the demo initial state a bit more friendly!
-        //     ImGui::ShowDemoWindow(&show_demo_window);
-        // }
+        if (show_demo_window)
+        {
+            ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway. Here we just want to make the demo initial state a bit more friendly!
+            ImGui::ShowDemoWindow(&show_demo_window);
+        }
 
         
         if (showMainMenu){
@@ -362,8 +363,8 @@ int main(){
             }
             if (ImGui::CollapsingHeader("Projection")){
                 ImGui::Indent();{
-                    ImGui::SliderFloat("Z near", &znear, 0.01f, zfar);
-                    ImGui::SliderFloat("Z far", &zfar, znear, 6000.0f);
+                    ImGui::SliderFloat("Z near", &mRenderer.znear, 0.01f, mRenderer.zfar);
+                    ImGui::SliderFloat("Z far", &mRenderer.zfar, mRenderer.znear, 6000.0f);
                     ImGui::BulletText("FoV is in Camera section, as Zoom");
                 }
                 ImGui::Unindent();
@@ -438,11 +439,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
-    int toTest = glfwGetInputMode(window, GLFW_CURSOR);//return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
+    int toTest = glfwGetInputMode(window, GLFW_CURSOR);// Return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
     if(toTest == GLFW_CURSOR_DISABLED){
         Camera* camera = (Camera*)glfwGetWindowUserPointer(window);
         camera->ProcessMouseMovement(xoffset, yoffset);
@@ -451,7 +452,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-    int toTest = glfwGetInputMode(window, GLFW_CURSOR);//return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
+    int toTest = glfwGetInputMode(window, GLFW_CURSOR);// Return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
     if(toTest == GLFW_CURSOR_DISABLED){
         Camera* camera = (Camera*)glfwGetWindowUserPointer(window);
         camera->ProcessMouseScroll(yoffset);
@@ -462,12 +463,12 @@ static void errorCallback(int error, const char* description){
     std::cout << "Error: " << description << "\n";
 }
 
-static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){//input callBack
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){//close window
+static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){// Input callBack
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){// Close window
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     if (key == GLFW_KEY_C && action == GLFW_PRESS){// Change the way to interact with mouse
-        int toTest = glfwGetInputMode(window, GLFW_CURSOR);//return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
+        int toTest = glfwGetInputMode(window, GLFW_CURSOR);// Return GLFW_CURSOR_DISABLED or GLFW_CURSOR_NORMAL
         if(toTest == GLFW_CURSOR_DISABLED){
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }else{
