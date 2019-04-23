@@ -15,7 +15,7 @@ struct Vertex {
     int colorIndex;
 };
 
-class RendableObject{
+class RenderableObject{
 public:
     float minx, maxx, miny, maxy, minz, maxz;
     unsigned int nTriangles;
@@ -25,6 +25,7 @@ public:
     std::vector<glm::vec3> specular;
     std::vector<float> shine;
     std::vector<Vertex> vertices;
+    glm::mat4 modelMatrix;
 
     std::vector<glm::vec3> faceNormals;
 
@@ -40,7 +41,7 @@ public:
 
     }
 
-    RendableObject(const char* objFilePath){
+    RenderableObject(const char* objFilePath){
         char ch;
         FILE* fp = fopen(objFilePath,"r");
         if (fp==NULL) {
@@ -57,7 +58,7 @@ public:
         fscanf(fp,"Material count = %d\n", &nMaterial);
         glm::vec3 auxVec3;
         float afmf;
-        int ifmf;
+        // int ifmf;
         Vertex vfmf;
         for (unsigned int i=0; i<nMaterial; i++) {
             fscanf(fp, "ambient color %f %f %f\n", &(auxVec3.x), &(auxVec3.y), &(auxVec3.z));
@@ -114,6 +115,7 @@ public:
         fclose(fp);
         setBoundingBox();
         generateVAOVBO();
+        generateModelOriginFixedSize();
     }
 
     void setBoundingBox(){
@@ -174,6 +176,20 @@ public:
         float cbby = (maxy + miny)/2;
         float cbbz = (maxz + minz)/2;
         return glm::vec3(cbbx, cbby, cbbz);
+    }
+
+    void generateModelOriginFixedSize(){
+        float scalasetNorm;
+        scalasetNorm = 1.5f/this->getMaxOffsetsize();
+        this->modelMatrix = glm::mat4(1.0f);
+        this->modelMatrix = glm::scale(this->modelMatrix, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
+        this->modelMatrix = glm::translate(this->modelMatrix, this->getCenterBBoxOCS() * -1.0f);
+    }
+
+    void drawTriangles(){
+        glBindVertexArray(this->VAO);
+        glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+        glBindVertexArray(0);
     }
 };
 

@@ -86,6 +86,9 @@ int main(){
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
     RendererLayer mRenderer = RendererLayer();
+    glm::mat4 view;
+    glm::mat4 projection;
+    glm::mat4 mvp;
     bool show_demo_window = false;
     glfwSetWindowUserPointer(window, &camera);
 
@@ -109,8 +112,8 @@ int main(){
 
     auto font_default = io.Fonts->AddFontDefault();
 
-    RendableObject cubeojb("../assets/models/cube.in");
-    RendableObject gisele("../assets/models/cow_up.in");
+    RenderableObject cubeojb("../assets/models/cube.in");
+    RenderableObject gisele("../assets/models/cow_up.in");
 
 
     // Load, compile and link shaders 
@@ -182,12 +185,7 @@ int main(){
         ImGui::NewFrame();
 
         // create transformations
-        glm::mat4 model; // make sure to initialize matrix to identity matrix first
-        glm::mat4 view          = glm::mat4(1.0f);
-        glm::mat4 projection    = glm::mat4(1.0f);
-        glm::mat4 mvp;
-
-        glfwGetWindowSize(window, &cscr_w, &cscr_h);//essa função é threadsafe
+        glfwGetWindowSize(window, &cscr_w, &cscr_h);// This function is threadsafe
         projection = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
 
         view = camera.GetViewMatrix();
@@ -201,35 +199,23 @@ int main(){
         loadObjectShader.setMat4("projection", projection);
         glm::vec3 colorObejects(objImColors.x, objImColors.y, objImColors.z);//   objImColors
         loadObjectShader.setVec3("uColor", colorObejects);
-        float scalasetNorm;
+        
 
         if(drawCubeFlag){
-            scalasetNorm = 1.5f/cubeojb.getMaxOffsetsize();
-            model = glm::mat4(1.0f);
-            model = glm::scale(model, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
-            model = glm::translate(model, cubeojb.getCenterBBoxOCS() * -1.0f);
-            loadObjectShader.setMat4("model", model);
-            mvp = projection * view * model;
+            loadObjectShader.setMat4("model", cubeojb.modelMatrix);
+            mvp = projection * view * cubeojb.modelMatrix;
             loadObjectShader.setMat4("mvp", mvp);
 
-            glBindVertexArray(cubeojb.VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glBindVertexArray(0);
+            cubeojb.drawTriangles();
         }
 
 
         if(drawCowGiseleFlag){
-            scalasetNorm = 1.5f/gisele.getMaxOffsetsize();
-            model = glm::mat4(1.0f);
-            model = glm::scale(model, glm::vec3(scalasetNorm, scalasetNorm, scalasetNorm));
-            model = glm::translate(model, gisele.getCenterBBoxOCS() * -1.0f);
-            loadObjectShader.setMat4("model", model);
-            mvp = projection * view * model;
+            loadObjectShader.setMat4("model", gisele.modelMatrix);
+            mvp = projection * view * gisele.modelMatrix;
             loadObjectShader.setMat4("mvp", mvp);
 
-            glBindVertexArray(gisele.VAO);
-            glDrawArrays(GL_TRIANGLES, 0, gisele.vertices.size());
-            glBindVertexArray(0);
+            gisele.drawTriangles();
         }
         
 
