@@ -77,24 +77,12 @@ public:
         while(ch!= '\n')  // skip documentation line
             fscanf(fp, "%c", &ch);
         
-
-        int firstrount = 1;
         for (unsigned int i=0; i<nTriangles; i++){
             fscanf(fp, "v0 %f %f %f %f %f %f %d\n",
             &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
             &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
             &(vfmf.colorIndex));
             vertices.push_back(vfmf);
-            if(firstrount){
-                minx = vfmf.Position.x;
-                maxx = vfmf.Position.x;
-                miny = vfmf.Position.y;
-                maxy = vfmf.Position.y;
-                minz = vfmf.Position.z;
-                maxz = vfmf.Position.z;
-                firstrount = 0;
-            }
-            minmaxTest(vfmf.Position);
 
             // normals.push_back(bauxVec3);
             // colorIndexes.push_back(ifmf);
@@ -104,14 +92,12 @@ public:
             &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
             &(vfmf.colorIndex));
             vertices.push_back(vfmf);
-            minmaxTest(vfmf.Position);
             
             fscanf(fp, "v2 %f %f %f %f %f %f %d\n",
             &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
             &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
             &(vfmf.colorIndex));
             vertices.push_back(vfmf);
-            minmaxTest(vfmf.Position);
             
             fscanf(fp, "face normal %f %f %f\n",
             &(auxVec3.x), &(auxVec3.y), &(auxVec3.z));
@@ -126,7 +112,27 @@ public:
         // std::cout << "max position values in axes (z, y, z): (" << maxx << ", " << maxy << ", " << maxz << ")\n";
 
         fclose(fp);
+        setBoundingBox();
+        generateVAOVBO();
+    }
 
+    void setBoundingBox(){
+        if (vertices.size() < 0){
+            return;
+        }
+        minx = vertices[0].Position.x;
+        maxx = vertices[0].Position.x;
+        miny = vertices[0].Position.y;
+        maxy = vertices[0].Position.y;
+        minz = vertices[0].Position.z;
+        maxz = vertices[0].Position.z;
+        for (unsigned int i = 0; i < vertices.size(); i++){
+            minmaxTest(vertices[i].Position);
+        }
+
+    }
+    
+    void generateVAOVBO(){
         glGenVertexArrays(1, &VAO); 
         glGenBuffers(1, &VBO);
 
