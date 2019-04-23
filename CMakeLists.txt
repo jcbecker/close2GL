@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(cgpg)
+project(close2GL)
 
 # Using cpp17
 set(CMAKE_CXX_STANDARD 17)
@@ -46,12 +46,12 @@ set(IMGUI_SOURCES
 # Sources files
 set(SOURCE_FILES src/main.cpp)
 
-add_executable(cgpg ${SOURCE_FILES} ${GLAD} ${IMGUI_SOURCES})
+add_executable(close2GL ${SOURCE_FILES} ${GLAD} ${IMGUI_SOURCES})
 
-target_link_libraries(cgpg glfw ${GLFW_LIBRARIES})
+target_link_libraries(close2GL glfw ${GLFW_LIBRARIES})
 
 if(MSVC)
-  target_compile_options(cgpg PRIVATE /W4 /WX)
+  target_compile_options(close2GL PRIVATE /W4 /WX)
 else()
-  target_compile_options(cgpg PRIVATE -Wall) # -Wextra
+  target_compile_options(close2GL PRIVATE -Wall) # -Wextra
 endif()
