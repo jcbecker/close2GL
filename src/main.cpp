@@ -18,6 +18,7 @@
 #include "camera.hpp"
 
 #include "yaol.hpp"
+#include "imguiUtil.hpp"
 
 #include "LCRenderer.hpp"
 
@@ -85,7 +86,7 @@ int main(){
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
     RendererLayer mRenderer = RendererLayer();
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     glfwSetWindowUserPointer(window, &camera);
 
     // configure global opengl state
@@ -184,6 +185,7 @@ int main(){
         glm::mat4 model; // make sure to initialize matrix to identity matrix first
         glm::mat4 view          = glm::mat4(1.0f);
         glm::mat4 projection    = glm::mat4(1.0f);
+        glm::mat4 mvp;
 
         glfwGetWindowSize(window, &cscr_w, &cscr_h);//essa função é threadsafe
         projection = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
@@ -207,6 +209,8 @@ int main(){
             model = glm::scale(model, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
             model = glm::translate(model, cubeojb.getCenterBBoxOCS() * -1.0f);
             loadObjectShader.setMat4("model", model);
+            mvp = projection * view * model;
+            loadObjectShader.setMat4("mvp", mvp);
 
             glBindVertexArray(cubeojb.VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -220,6 +224,9 @@ int main(){
             model = glm::scale(model, glm::vec3(scalasetNorm, scalasetNorm, scalasetNorm));
             model = glm::translate(model, gisele.getCenterBBoxOCS() * -1.0f);
             loadObjectShader.setMat4("model", model);
+            mvp = projection * view * model;
+            loadObjectShader.setMat4("mvp", mvp);
+
             glBindVertexArray(gisele.VAO);
             glDrawArrays(GL_TRIANGLES, 0, gisele.vertices.size());
             glBindVertexArray(0);
@@ -308,6 +315,11 @@ int main(){
                 }
                 ImGui::Unindent();
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            if (ImGui::CollapsingHeader("Render")){
+                tabularGlmMat4("Projection", projection);
+                tabularGlmMat4("View", view);
+                tabularGlmMat4("MVP", mvp);
             }
             if (ImGui::CollapsingHeader("Camera")){
                 ImGui::Separator();
