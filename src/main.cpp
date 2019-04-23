@@ -19,6 +19,7 @@
 
 #include "yaol.hpp"
 #include "imguiUtil.hpp"
+#include "LCRenderer.hpp"
 
 #include "LCRenderer.hpp"
 
@@ -90,6 +91,7 @@ int main(){
     glm::mat4 projection;
     glm::mat4 mvp;
     bool show_demo_window = false;
+    Renderer arc = OPENGL;
     glfwSetWindowUserPointer(window, &camera);
 
     // configure global opengl state
@@ -118,6 +120,7 @@ int main(){
 
     // Load, compile and link shaders 
     Shader loadObjectShader("../assets/shaders/loadtest.vert", "../assets/shaders/loadtest.frag");
+    Shader close2GLShader("../assets/shaders/close2gl.vert", "../assets/shaders/close2gl.frag");
 
     bool drawCubeFlag = true;
     bool drawCowGiseleFlag = true;
@@ -192,30 +195,48 @@ int main(){
 
         glPolygonMode(GL_FRONT_AND_BACK, drawPrimitive);
         
+        glm::vec3 colorObejects(objImColors.x, objImColors.y, objImColors.z);//   objImColors
         
         //  Draw Cals
-        loadObjectShader.use();
-        loadObjectShader.setMat4("view", view);
-        loadObjectShader.setMat4("projection", projection);
-        glm::vec3 colorObejects(objImColors.x, objImColors.y, objImColors.z);//   objImColors
-        loadObjectShader.setVec3("uColor", colorObejects);
-        
+        if(arc ==  OPENGL){
+            loadObjectShader.use();
+            loadObjectShader.setMat4("view", view);
+            loadObjectShader.setMat4("projection", projection);
+            loadObjectShader.setVec3("uColor", colorObejects);
+            
 
-        if(drawCubeFlag){
-            loadObjectShader.setMat4("model", cubeojb.modelMatrix);
-            mvp = projection * view * cubeojb.modelMatrix;
-            loadObjectShader.setMat4("mvp", mvp);
+            if(drawCubeFlag){
+                loadObjectShader.setMat4("model", cubeojb.modelMatrix);
+                mvp = projection * view * cubeojb.modelMatrix;
+                loadObjectShader.setMat4("mvp", mvp);
 
-            cubeojb.drawTriangles();
-        }
+                cubeojb.drawTriangles();
+            }
 
 
-        if(drawCowGiseleFlag){
-            loadObjectShader.setMat4("model", gisele.modelMatrix);
-            mvp = projection * view * gisele.modelMatrix;
-            loadObjectShader.setMat4("mvp", mvp);
+            if(drawCowGiseleFlag){
+                loadObjectShader.setMat4("model", gisele.modelMatrix);
+                mvp = projection * view * gisele.modelMatrix;
+                loadObjectShader.setMat4("mvp", mvp);
 
-            gisele.drawTriangles();
+                gisele.drawTriangles();
+            }
+        }else{
+            close2GLShader.use();
+            close2GLShader.setVec3("uColor", colorObejects);
+            
+            if(drawCubeFlag){
+                mvp = projection * view * cubeojb.modelMatrix;
+                cubeojb.updateClose2GLBuffers(mvp);
+                cubeojb.drawTrianglesClose2GL();
+            }
+
+            if(drawCowGiseleFlag){
+                mvp = projection * view * gisele.modelMatrix;
+                gisele.updateClose2GLBuffers(mvp);
+                gisele.drawTrianglesClose2GL();
+            }
+
         }
         
 
@@ -303,6 +324,14 @@ int main(){
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             }
             if (ImGui::CollapsingHeader("Render")){
+
+                ImGui::BulletText("Change Render mode");
+                ImGui::Indent();{
+                    if (ImGui::RadioButton("OPENGL", arc == OPENGL)) { arc = OPENGL; }
+                    if (ImGui::RadioButton("CLOSE2GL", arc == CLOSE2GL)) { arc = CLOSE2GL; }
+                }
+                ImGui::Unindent();
+
                 tabularGlmMat4("Projection", projection);
                 tabularGlmMat4("View", view);
                 tabularGlmMat4("MVP", mvp);

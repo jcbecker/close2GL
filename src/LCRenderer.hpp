@@ -10,20 +10,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-enum RendererChoices {
+enum Renderer {
     CLOSE2GL,
     OPENGL
 };
 
 class RendererLayer{
 public:
-    RendererChoices choice;
+    Renderer choice;
     float znear;
     float zfar;
 
     RendererLayer(){
         this->znear = 1.0f;
         this->zfar = 3000.0f;
+        this->choice = OPENGL;
     }
 
     // glm::mat4 getProjectionMatrix(){
