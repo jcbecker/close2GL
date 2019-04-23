@@ -50,8 +50,8 @@ add_executable(close2GL ${SOURCE_FILES} ${GLAD} ${IMGUI_SOURCES})
 
 target_link_libraries(close2GL glfw ${GLFW_LIBRARIES})
 
-if(MSVC)
-  target_compile_options(close2GL PRIVATE /W4 /WX)
-else()
-  target_compile_options(close2GL PRIVATE -Wall) # -Wextra
-endif()
+# if(MSVC)
+#   target_compile_options(close2GL PRIVATE /W4 /WX)
+# else()
+#   target_compile_options(close2GL PRIVATE -Wall) # -Wextra
+# endif()
