@@ -1,5 +1,8 @@
 //Yet Another Object Loader
 
+
+// TO - Do: clean VAOs and VBOs from memory
+
 #ifndef YET_ANOTHER_OBJECT_LOADER
 #define YET_ANOTHER_OBJECT_LOADER
 
@@ -8,6 +11,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <cstdio>
+
+struct Close2GLVertex {
+    glm::vec4 Position;
+    glm::vec3 Normal;
+    int colorIndex;
+};
 
 struct Vertex {
     glm::vec3 Position;
@@ -30,6 +39,12 @@ public:
     std::vector<glm::vec3> faceNormals;
 
     GLuint VAO, VBO;
+
+
+    GLuint C2GLVAO, C2GLVBO;
+    std::vector<Close2GLVertex> C2GLvertices;
+
+
     void minmaxTest(glm::vec3 vtt){
         if (minx > vtt.x) minx = vtt.x;
         if (miny > vtt.y) miny = vtt.y;
@@ -116,6 +131,8 @@ public:
         setBoundingBox();
         generateVAOVBO();
         generateModelOriginFixedSize();
+
+        generateClose2GLVAOVBO();
     }
 
     void setBoundingBox(){
@@ -158,6 +175,41 @@ public:
 
     }
 
+    void generateClose2GLVAOVBO(){
+        glGenVertexArrays(1, &C2GLVAO); 
+        glGenBuffers(1, &C2GLVBO);
+    }
+
+    void updateClose2GLBuffers(glm::mat4 mvp){
+        glm::vec4 avm;
+        Close2GLVertex aav;
+        C2GLvertices = std::vector<Close2GLVertex>();
+        // C2GLvertices.reserve(this->vertices.size()); // Use reserve, maybe can save some fps in close2gl
+        for(unsigned int yai = 0; yai < vertices.size(); yai++){
+            avm = glm::vec4(vertices[yai].Position, 1.0f);
+            avm = mvp * avm;
+            aav.Position = avm;
+            aav.Normal = vertices[yai].Normal;
+            aav.colorIndex = vertices[yai].colorIndex;
+            C2GLvertices.push_back(aav);
+        }
+
+        glBindVertexArray(C2GLVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, C2GLVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Close2GLVertex) * this->C2GLvertices.size(),  &this->C2GLvertices[0], GL_DYNAMIC_DRAW);
+
+        // Position attribute
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Normal attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)offsetof(Close2GLVertex, Normal));
+        glEnableVertexAttribArray(1);
+
+        glBindVertexArray(0);
+    }
+
     float getMaxOffsetsize(){
         float offx = maxx - minx;
         float offy = maxy - miny;
@@ -189,6 +241,12 @@ public:
     void drawTriangles(){
         glBindVertexArray(this->VAO);
         glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+        glBindVertexArray(0);
+    }
+
+    void drawTrianglesClose2GL(){
+        glBindVertexArray(this->C2GLVAO);
+        glDrawArrays(GL_TRIANGLES, 0, this->C2GLvertices.size());
         glBindVertexArray(0);
     }
 };
