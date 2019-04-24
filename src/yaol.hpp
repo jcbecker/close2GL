@@ -184,7 +184,7 @@ public:
         glm::vec4 avm;
         Close2GLVertex aav;
         C2GLvertices = std::vector<Close2GLVertex>();
-        // C2GLvertices.reserve(this->vertices.size()); // Use reserve, maybe can save some fps in close2gl
+        C2GLvertices.reserve(this->vertices.size()); // Use reserve, maybe can save some fps in close2gl
         for(unsigned int yai = 0; yai < vertices.size(); yai++){
             avm = glm::vec4(vertices[yai].Position, 1.0f);
             avm = mvp * avm;

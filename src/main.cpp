@@ -163,7 +163,7 @@ int main(){
     GLuint orientationMode = GL_CCW;
     glPolygonMode(GL_FRONT, drawPrimitive);
     // Render loop
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     double previousTime = glfwGetTime();
     int frameCount = 0;
     int gfps = 0;
