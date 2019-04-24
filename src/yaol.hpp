@@ -12,6 +12,12 @@
 #include <vector>
 #include <cstdio>
 
+struct Close2GLVertex {
+    glm::vec4 Position;
+    glm::vec3 Normal;
+    int colorIndex;
+};
+
 struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
@@ -36,7 +42,7 @@ public:
 
 
     GLuint C2GLVAO, C2GLVBO;
-    std::vector<Vertex> C2GLvertices;
+    std::vector<Close2GLVertex> C2GLvertices;
 
 
     void minmaxTest(glm::vec3 vtt){
@@ -172,34 +178,33 @@ public:
     void generateClose2GLVAOVBO(){
         glGenVertexArrays(1, &C2GLVAO); 
         glGenBuffers(1, &C2GLVBO);
-        C2GLvertices.reserve(this->vertices.size());
     }
 
     void updateClose2GLBuffers(glm::mat4 mvp){
         glm::vec4 avm;
+        Close2GLVertex aav;
+        C2GLvertices = std::vector<Close2GLVertex>();
+        // C2GLvertices.reserve(this->vertices.size()); // Use reserve, maybe can save some fps in close2gl
         for(unsigned int yai = 0; yai < vertices.size(); yai++){
             avm = glm::vec4(vertices[yai].Position, 1.0f);
             avm = mvp * avm;
-            C2GLvertices[yai].Position = glm::vec3(avm);
-            C2GLvertices[yai].Normal = vertices[yai].Normal;
-            C2GLvertices[yai].colorIndex = vertices[yai].colorIndex;
+            aav.Position = avm;
+            aav.Normal = vertices[yai].Normal;
+            aav.colorIndex = vertices[yai].colorIndex;
+            C2GLvertices.push_back(aav);
         }
-        // std::cout << "Vert: (" << vertices[0].Position.x << ", " << vertices[0].Position.y << ", " << vertices[0].Position.z << ")\n";
-        C2GLvertices[0].Position = glm::vec3(-0.5f, -0.5f, 0.0f);
-        C2GLvertices[1].Position = glm::vec3( 0.5f, -0.5f, 0.0f);
-        C2GLvertices[2].Position = glm::vec3( 0.0f,  0.5f, 0.0f);
 
         glBindVertexArray(C2GLVAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, C2GLVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * this->C2GLvertices.size(),  &this->C2GLvertices[0], GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Close2GLVertex) * this->C2GLvertices.size(),  &this->C2GLvertices[0], GL_DYNAMIC_DRAW);
 
         // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Normal attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)offsetof(Close2GLVertex, Normal));
         glEnableVertexAttribArray(1);
 
         glBindVertexArray(0);
@@ -240,7 +245,6 @@ public:
     }
 
     void drawTrianglesClose2GL(){
-        std::cout << "Tset: (" << C2GLvertices[0].Position.x << ", " << C2GLvertices[0].Position.y << ", " << C2GLvertices[0].Position.z << ")\n";
         glBindVertexArray(this->C2GLVAO);
         glDrawArrays(GL_TRIANGLES, 0, this->C2GLvertices.size());
         glBindVertexArray(0);
