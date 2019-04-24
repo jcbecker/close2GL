@@ -163,11 +163,26 @@ int main(){
     GLuint orientationMode = GL_CCW;
     glPolygonMode(GL_FRONT, drawPrimitive);
     // Render loop
+    glfwSwapInterval(1);
+    double previousTime = glfwGetTime();
+    int frameCount = 0;
+    int gfps = 0;
+
     while (!glfwWindowShouldClose(window)){
         // Per-frame time logic
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
+
+        double currentTime = glfwGetTime();
+        frameCount++;
+        // If a second has passed.
+        if ( currentTime - previousTime >= 1.0 ){
+            gfps = frameCount;
+
+            frameCount = 0;
+            previousTime = currentTime;
+        }
 
         // Input
         processHoldingKeyInput(window);
@@ -321,7 +336,8 @@ int main(){
                     ImGui::ColorEdit3("clear color", (float*)&clear_color);
                 }
                 ImGui::Unindent();
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::Text("Application (%d FPS)", gfps);
+                ImGui::Text("Imgui average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             }
             if (ImGui::CollapsingHeader("Render")){
 
