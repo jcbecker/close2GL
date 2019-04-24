@@ -418,6 +418,12 @@ int main(){
     glDeleteVertexArrays(1, &gisele.VAO);
     glDeleteBuffers(1, &gisele.VBO);
 
+    glDeleteVertexArrays(1, &cubeojb.C2GLVAO);
+    glDeleteBuffers(1, &cubeojb.C2GLVBO);
+    
+    glDeleteVertexArrays(1, &gisele.C2GLVAO);
+    glDeleteBuffers(1, &gisele.C2GLVBO);
+
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwDestroyWindow(window);
