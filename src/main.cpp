@@ -351,6 +351,10 @@ int main(){
                 tabularGlmMat4("Projection", projection);
                 tabularGlmMat4("View", view);
                 tabularGlmMat4("MVP", mvp);
+                glm::mat4 yatest2 = glm::mat4(1.0f);
+                yatest2 = glm::scale(yatest2, glm::vec3(0.5 , 0.5 , 0.5));
+                yatest2 = glm::translate(yatest2, glm::vec3(1.0f, 2.0f, 3.0f));
+                tabularGlmMat4("yatest2", yatest2);
             }
             if (ImGui::CollapsingHeader("Camera")){
                 ImGui::Separator();

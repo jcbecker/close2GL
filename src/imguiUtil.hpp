@@ -15,10 +15,10 @@ void tabularGlmMat4(const char* title, glm::mat4 matrix){
     ImGui::Columns(4, "mycolumns"); // 4-ways, with border
     ImGui::Separator();
     for(unsigned int ai = 0; ai < 4; ai++){
-        ImGui::Text("%f", matrix[ai][0]); ImGui::NextColumn();
-        ImGui::Text("%f", matrix[ai][1]); ImGui::NextColumn();
-        ImGui::Text("%f", matrix[ai][2]); ImGui::NextColumn();
-        ImGui::Text("%f", matrix[ai][3]); ImGui::NextColumn();
+        ImGui::Text("%f", matrix[0][ai]); ImGui::NextColumn();
+        ImGui::Text("%f", matrix[1][ai]); ImGui::NextColumn();
+        ImGui::Text("%f", matrix[2][ai]); ImGui::NextColumn();
+        ImGui::Text("%f", matrix[3][ai]); ImGui::NextColumn();
         ImGui::Separator();
     }
     ImGui::Columns(1);
