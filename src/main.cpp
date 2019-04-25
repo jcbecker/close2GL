@@ -217,7 +217,6 @@ int main(){
 
         projection = projectionsymmetric;
 
-        view = camera.GetViewMatrix();
 
         glPolygonMode(GL_FRONT_AND_BACK, drawPrimitive);
         
@@ -225,6 +224,7 @@ int main(){
         
         //  Draw Cals
         if(arc ==  OPENGL){
+            view = camera.GetViewMatrix();
             loadObjectShader.use();
             loadObjectShader.setMat4("view", view);
             loadObjectShader.setMat4("projection", projection);
@@ -248,6 +248,7 @@ int main(){
                 gisele.drawTriangles();
             }
         }else{
+            view = camera.lookAtClose2GL();
             close2GLShader.use();
             close2GLShader.setVec3("uColor", colorObejects);
             

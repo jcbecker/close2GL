@@ -89,6 +89,34 @@ public:
         return glm::lookAt(Position, Position + Front, Up);
     }
 
+    glm::mat4 lookAtClose2GL(){
+        glm::vec3 zaxis = glm::normalize(-Front);
+        glm::vec3 xaxis = glm::normalize(glm::cross(glm::normalize(Up), zaxis));
+        glm::vec3 yaxis = glm::cross(zaxis, xaxis);
+
+        // Create translation and rotation matrix
+        // Warning mat[col][row] due to column-major layout
+        glm::mat4 translation = glm::mat4(1.0f);
+        translation[3][0] = -Position.x;
+        translation[3][1] = -Position.y;
+        translation[3][2] = -Position.z;
+        glm::mat4 rotation = glm::mat4(1.0f);
+        // First column, first row
+        rotation[0][0] = xaxis.x;
+        rotation[1][0] = xaxis.y;
+        rotation[2][0] = xaxis.z;
+        // First column, second row
+        rotation[0][1] = yaxis.x;
+        rotation[1][1] = yaxis.y;
+        rotation[2][1] = yaxis.z;
+        // First column, third row
+        rotation[0][2] = zaxis.x;
+        rotation[1][2] = zaxis.y;
+        rotation[2][2] = zaxis.z;
+
+        return rotation * translation;
+    }
+
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
