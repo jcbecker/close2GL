@@ -208,10 +208,10 @@ int main(){
         glfwGetWindowSize(window, &cscr_w, &cscr_h);// This function is threadsafe
         projectionsymmetric = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
         float h = glm::tan(glm::radians(camera.Zoom) * .5f) * mRenderer.znear;
-		float w = h * ((float)cscr_w / (float)cscr_h);
-		float frustumLeft = -w;
-		float frustumRight = w;
-		float frustumBottom = -h;
+        float w = h * ((float)cscr_w / (float)cscr_h);
+        float frustumLeft = -w;
+        float frustumRight = w;
+        float frustumBottom = -h;
         float frustumTop = h;
         projectionnonsymmetric = glm::frustum(frustumLeft, frustumRight, frustumBottom, frustumTop, mRenderer.znear, mRenderer.zfar);
 

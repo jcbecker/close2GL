@@ -13,7 +13,7 @@
 #include <cstdio>
 
 struct Close2GLVertex {
-    glm::vec4 Position;
+    glm::vec2 Position;
     glm::vec3 Normal;
     int colorIndex;
 };
@@ -199,7 +199,7 @@ public:
                 avm = avm/avm.w;
             }
             // std::cout << "After : ( " << avm.x << ", " << avm.y << ", " << avm.z << ", " << avm.w << ")\n";   
-            aav.Position = avm;
+            aav.Position = glm::vec2(avm);
             aav.Normal = vertices[yai].Normal;
             aav.colorIndex = vertices[yai].colorIndex;
             C2GLvertices.push_back(aav);
@@ -211,7 +211,7 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(Close2GLVertex) * this->C2GLvertices.size(),  &this->C2GLvertices[0], GL_DYNAMIC_DRAW);
 
         // Position attribute
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Close2GLVertex), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Normal attribute
