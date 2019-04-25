@@ -93,6 +93,8 @@ int main(){
     glm::mat4 mvp;
     bool show_demo_window = false;
     Renderer arc = OPENGL;
+    glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
+    glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     glfwSetWindowUserPointer(window, &camera);
 
     // configure global opengl state
@@ -231,6 +233,10 @@ int main(){
             loadObjectShader.setMat4("view", view);
             loadObjectShader.setMat4("projection", projection);
             loadObjectShader.setVec3("uColor", colorObejects);
+
+            loadObjectShader.setVec3("lcolor", lightColor);
+            loadObjectShader.setVec3("lightPos", lightPosition);
+            loadObjectShader.setVec3("viewPos", camera.Position);
             
 
             if(drawCubeFlag){

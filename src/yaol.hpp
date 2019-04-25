@@ -130,6 +130,15 @@ public:
         // std::cout << "max position values in axes (z, y, z): (" << maxx << ", " << maxy << ", " << maxz << ")\n";
 
         fclose(fp);
+
+        // Workaround to get light in cow more natural
+        if (objFilePath == "../assets/models/cow_up.in"){
+            for (unsigned int i = 0; i < vertices.size(); i++){
+                vertices[i].Normal *= -1.0f;
+            }
+        }
+
+
         setBoundingBox();
         generateVAOVBO();
         generateModelOriginFixedSize();
@@ -249,7 +258,7 @@ public:
         this->modelMatrix = glm::mat4(1.0f);
         this->modelMatrix = glm::scale(this->modelMatrix, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
         this->modelMatrix = glm::translate(this->modelMatrix, this->getCenterBBoxOCS() * -1.0f);
-        
+
         this->modelClose2GL = glm::mat4(1.0f);
         this->modelClose2GL = C2GL::scale(this->modelClose2GL, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
         this->modelClose2GL = C2GL::translate(this->modelClose2GL, this->getCenterBBoxOCS() * -1.0f);
