@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <cstdio>
+#include "close2GL.hpp"
 
 struct Close2GLVertex {
     glm::vec2 Position;
@@ -43,6 +44,7 @@ public:
 
     GLuint C2GLVAO, C2GLVBO;
     std::vector<Close2GLVertex> C2GLvertices;
+    glm::mat4 modelClose2GL;
 
 
     void minmaxTest(glm::vec3 vtt){
@@ -247,6 +249,11 @@ public:
         this->modelMatrix = glm::mat4(1.0f);
         this->modelMatrix = glm::scale(this->modelMatrix, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
         this->modelMatrix = glm::translate(this->modelMatrix, this->getCenterBBoxOCS() * -1.0f);
+        
+        this->modelClose2GL = glm::mat4(1.0f);
+        this->modelClose2GL = C2GL::scale(this->modelClose2GL, glm::vec3(scalasetNorm , scalasetNorm , scalasetNorm));
+        this->modelClose2GL = C2GL::translate(this->modelClose2GL, this->getCenterBBoxOCS() * -1.0f);
+        // this->modelClose2GL = C2GL::translate();
     }
 
     void drawTriangles(){

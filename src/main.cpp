@@ -21,8 +21,6 @@
 #include "imguiUtil.hpp"
 #include "LCRenderer.hpp"
 
-#include "LCRenderer.hpp"
-
 // Functions signatures
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -253,13 +251,13 @@ int main(){
             close2GLShader.setVec3("uColor", colorObejects);
             
             if(drawCubeFlag){
-                mvp = projection * view * cubeojb.modelMatrix;
+                mvp = projection * view * cubeojb.modelClose2GL;
                 cubeojb.updateClose2GLBuffers(mvp);
                 cubeojb.drawTrianglesClose2GL();
             }
 
             if(drawCowGiseleFlag){
-                mvp = projection * view * gisele.modelMatrix;
+                mvp = projection * view * gisele.modelClose2GL;
                 gisele.updateClose2GLBuffers(mvp);
                 gisele.drawTrianglesClose2GL();
             }
