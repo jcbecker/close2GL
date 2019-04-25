@@ -94,6 +94,7 @@ int main(){
     bool show_demo_window = false;
     Renderer arc = OPENGL;
     bool useLight = false;
+    bool isGouraud = false;
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     glfwSetWindowUserPointer(window, &camera);
@@ -239,6 +240,7 @@ int main(){
             loadObjectShader.setVec3("lightPos", lightPosition);
             loadObjectShader.setVec3("viewPos", camera.Position);
             loadObjectShader.setBool("useLight", useLight);
+            loadObjectShader.setBool("isGouraud", isGouraud);
             
 
             if(drawCubeFlag){
@@ -436,11 +438,20 @@ int main(){
                 ImGui::Unindent();
             }
             if (ImGui::CollapsingHeader("Light")){
+                ImGui::BulletText("on/off");
                 ImGui::Indent();{
                     if (ImGui::RadioButton("ON", useLight)) { useLight = true; }
                     if (ImGui::RadioButton("OFF", !useLight)) { useLight = false; }
                 }
                 ImGui::Unindent();
+
+                ImGui::BulletText("Light shading type");
+                ImGui::Indent();{
+                    if (ImGui::RadioButton("Gouraud", isGouraud)) { isGouraud = true; }
+                    if (ImGui::RadioButton("Phong", !isGouraud)) { isGouraud = false; }
+                }
+                ImGui::Unindent();
+
                 ImGui::ColorEdit3("Light color", (float*)&lightColor);
                 ImGui::BulletText("Light position");
                 ImGui::Indent();{

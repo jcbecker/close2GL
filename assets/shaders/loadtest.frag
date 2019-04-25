@@ -2,6 +2,7 @@
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 LightingColor; 
 
 out vec4 FragColor;
 
@@ -10,12 +11,13 @@ uniform vec3 lcolor;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform bool useLight;
+uniform bool isGouraud;
 
 void main(){
     // FragColor = vec4(uColor, 1.0);
 
-    if(useLight){
-        float ambientStrength = 0.1;
+    if(useLight && !isGouraud){
+        float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * lcolor;
         vec3 norm = normalize(Normal);
         vec3 lightDir = normalize(lightPos - FragPos);
@@ -32,8 +34,12 @@ void main(){
 
         vec3 result = (ambient + diffuse + specular) * uColor;
         FragColor = vec4(result, 1.0);
-    }else{
+    }
+    if (!useLight){
         FragColor = vec4(uColor, 1.0);
+    }
+    if(useLight && isGouraud){
+        FragColor = vec4(LightingColor * uColor, 1.0);
     }
 
 }
