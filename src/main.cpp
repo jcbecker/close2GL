@@ -93,6 +93,7 @@ int main(){
     glm::mat4 mvp;
     bool show_demo_window = false;
     Renderer arc = OPENGL;
+    bool useLight = false;
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     glfwSetWindowUserPointer(window, &camera);
@@ -237,6 +238,7 @@ int main(){
             loadObjectShader.setVec3("lcolor", lightColor);
             loadObjectShader.setVec3("lightPos", lightPosition);
             loadObjectShader.setVec3("viewPos", camera.Position);
+            loadObjectShader.setBool("useLight", useLight);
             
 
             if(drawCubeFlag){
@@ -434,6 +436,11 @@ int main(){
                 ImGui::Unindent();
             }
             if (ImGui::CollapsingHeader("Light")){
+                ImGui::Indent();{
+                    if (ImGui::RadioButton("ON", useLight)) { useLight = true; }
+                    if (ImGui::RadioButton("OFF", !useLight)) { useLight = false; }
+                }
+                ImGui::Unindent();
                 ImGui::ColorEdit3("Light color", (float*)&lightColor);
                 ImGui::BulletText("Light position");
                 ImGui::Indent();{
