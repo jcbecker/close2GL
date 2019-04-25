@@ -89,6 +89,8 @@ int main(){
     RendererLayer mRenderer = RendererLayer();
     glm::mat4 view;
     glm::mat4 projection;
+    glm::mat4 projectionnonsymmetric;
+    glm::mat4 projectionsymmetric;
     glm::mat4 mvp;
     bool show_demo_window = false;
     Renderer arc = OPENGL;
@@ -204,7 +206,16 @@ int main(){
 
         // create transformations
         glfwGetWindowSize(window, &cscr_w, &cscr_h);// This function is threadsafe
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
+        projectionsymmetric = glm::perspective(glm::radians(camera.Zoom), (float)cscr_w / (float)cscr_h, mRenderer.znear, mRenderer.zfar);
+        float h = glm::tan(glm::radians(camera.Zoom) * .5f) * mRenderer.znear;
+		float w = h * ((float)cscr_w / (float)cscr_h);
+		float frustumLeft = -w;
+		float frustumRight = w;
+		float frustumBottom = -h;
+        float frustumTop = h;
+        projectionnonsymmetric = glm::frustum(frustumLeft, frustumRight, frustumBottom, frustumTop, mRenderer.znear, mRenderer.zfar);
+
+        projection = projectionsymmetric;
 
         view = camera.GetViewMatrix();
 
