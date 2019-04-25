@@ -134,7 +134,7 @@ public:
         // Workaround to get light in cow more natural
         if (objFilePath == "../assets/models/cow_up.in"){
             for (unsigned int i = 0; i < vertices.size(); i++){
-                vertices[i].Normal *= -1.0f;
+                vertices[i].Normal.z *= -1.0f;
             }
         }
 

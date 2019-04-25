@@ -433,6 +433,16 @@ int main(){
                 }
                 ImGui::Unindent();
             }
+            if (ImGui::CollapsingHeader("Light")){
+                ImGui::ColorEdit3("Light color", (float*)&lightColor);
+                ImGui::BulletText("Light position");
+                ImGui::Indent();{
+                    ImGui::SliderFloat("X", &lightPosition.x, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Y", &lightPosition.y, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Z", &lightPosition.z, -20.0f, 20.0f);
+                }
+                ImGui::Unindent();
+            }
             ImGui::End();
         }
         // Imgui Render Calls
