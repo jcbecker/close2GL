@@ -89,6 +89,7 @@ int main(){
     glm::mat4 projection;
     glm::mat4 projectionnonsymmetric;
     glm::mat4 projectionsymmetric;
+    glm::mat4 projectionClose2GL;
     glm::mat4 mvp;
     bool show_demo_window = false;
     Renderer arc = OPENGL;
@@ -212,8 +213,10 @@ int main(){
         float frustumBottom = -h;
         float frustumTop = h;
         projectionnonsymmetric = glm::frustum(frustumLeft, frustumRight, frustumBottom, frustumTop, mRenderer.znear, mRenderer.zfar);
+        projectionClose2GL = C2GL::frustum(frustumLeft, frustumRight, frustumBottom, frustumTop, mRenderer.znear, mRenderer.zfar);
+        // std::cout << "l r b t" << frustumLeft << ", " << frustumRight << ", " << frustumBottom << ", " << frustumTop << "\n";
 
-        projection = projectionsymmetric;
+        
 
 
         glPolygonMode(GL_FRONT_AND_BACK, drawPrimitive);
@@ -222,6 +225,7 @@ int main(){
         
         //  Draw Cals
         if(arc ==  OPENGL){
+            projection = projectionsymmetric;
             view = camera.GetViewMatrix();
             loadObjectShader.use();
             loadObjectShader.setMat4("view", view);
@@ -246,6 +250,7 @@ int main(){
                 gisele.drawTriangles();
             }
         }else{
+            projection = projectionClose2GL;
             view = camera.lookAtClose2GL();
             close2GLShader.use();
             close2GLShader.setVec3("uColor", colorObejects);
@@ -361,10 +366,6 @@ int main(){
                 tabularGlmMat4("Projection", projection);
                 tabularGlmMat4("View", view);
                 tabularGlmMat4("MVP", mvp);
-                glm::mat4 yatest2 = glm::mat4(1.0f);
-                yatest2 = glm::scale(yatest2, glm::vec3(0.5 , 0.5 , 0.5));
-                yatest2 = glm::translate(yatest2, glm::vec3(1.0f, 2.0f, 3.0f));
-                tabularGlmMat4("yatest2", yatest2);
             }
             if (ImGui::CollapsingHeader("Camera")){
                 ImGui::Separator();
