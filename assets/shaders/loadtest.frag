@@ -14,8 +14,6 @@ uniform bool useLight;
 uniform bool isGouraud;
 
 void main(){
-    // FragColor = vec4(uColor, 1.0);
-
     if(useLight && !isGouraud){
         float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * lcolor;

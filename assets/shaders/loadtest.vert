@@ -12,6 +12,7 @@ uniform vec3 lcolor;
 uniform vec3 viewPos;
 uniform bool useLight;
 uniform bool isGouraud;
+uniform bool gouraudSpecular;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -26,7 +27,7 @@ void main(){
         vec3 cNormal = mat3(transpose(inverse(model))) * aNormal;
         
         // ambient
-        float ambientStrength = 0.1;
+        float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * lcolor;
         
         // diffuse 
@@ -37,6 +38,9 @@ void main(){
         
         // specular
         float specularStrength = 0.8;
+        if (!gouraudSpecular){
+            specularStrength = 0.0;
+        }
         vec3 viewDir = normalize(viewPos - Position);
         vec3 reflectDir = reflect(-lightDir, norm);  
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);

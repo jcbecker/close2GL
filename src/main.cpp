@@ -95,6 +95,7 @@ int main(){
     Renderer arc = OPENGL;
     bool useLight = false;
     bool isGouraud = false;
+    bool gouraudSpecular = true;
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     glfwSetWindowUserPointer(window, &camera);
@@ -241,6 +242,8 @@ int main(){
             loadObjectShader.setVec3("viewPos", camera.Position);
             loadObjectShader.setBool("useLight", useLight);
             loadObjectShader.setBool("isGouraud", isGouraud);
+            loadObjectShader.setBool("gouraudSpecular", gouraudSpecular);
+            
             
 
             if(drawCubeFlag){
@@ -449,6 +452,13 @@ int main(){
                 ImGui::Indent();{
                     if (ImGui::RadioButton("Gouraud", isGouraud)) { isGouraud = true; }
                     if (ImGui::RadioButton("Phong", !isGouraud)) { isGouraud = false; }
+                }
+                ImGui::Unindent();
+
+                ImGui::BulletText("Gouraud style");
+                ImGui::Indent();{
+                    if (ImGui::RadioButton("GouraudADS", gouraudSpecular)) { gouraudSpecular = true; }
+                    if (ImGui::RadioButton("GouraudAD", !gouraudSpecular)) { gouraudSpecular = false; }
                 }
                 ImGui::Unindent();
 
