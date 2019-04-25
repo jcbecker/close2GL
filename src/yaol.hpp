@@ -188,6 +188,17 @@ public:
         for(unsigned int yai = 0; yai < vertices.size(); yai++){
             avm = glm::vec4(vertices[yai].Position, 1.0f);
             avm = mvp * avm;
+            // std::cout << "Before: ( " << avm.x << ", " << avm.y << ", " << avm.z << ", " << avm.w << ")\n";
+            if (avm.w == 0.0f || avm.w == -0.0f){
+                std::cout << "Erro w = 0 : ( " << avm.x << ", " << avm.y << ", " << avm.z << ", " << avm.w << ")\n";
+                exit(1);
+            }
+            if (avm.w < 0.0f){
+                // std::cout << "w negativo\n\n";
+            }else{
+                avm = avm/avm.w;
+            }
+            // std::cout << "After : ( " << avm.x << ", " << avm.y << ", " << avm.z << ", " << avm.w << ")\n";   
             aav.Position = avm;
             aav.Normal = vertices[yai].Normal;
             aav.colorIndex = vertices[yai].colorIndex;
