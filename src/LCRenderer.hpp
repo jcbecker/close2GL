@@ -12,7 +12,8 @@
 
 enum Renderer {
     CLOSE2GL,
-    OPENGL
+    OPENGL,
+    CLOSE2GLRASTERIZATION
 };
 
 class RendererLayer{

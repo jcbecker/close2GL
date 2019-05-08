@@ -69,6 +69,12 @@ public:
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
+    // constructor copy a compiled shader
+    // ------------------------------------------------------------------------
+    Shader(const Shader &in_shader){
+        this->ID = in_shader.ID;
+    }
+
     // activate the shader
     // ------------------------------------------------------------------------
     void use() const

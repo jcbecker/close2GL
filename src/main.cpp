@@ -127,6 +127,10 @@ int main(){
     // Load, compile and link shaders 
     Shader loadObjectShader("../assets/shaders/loadtest.vert", "../assets/shaders/loadtest.frag");
     Shader close2GLShader("../assets/shaders/close2gl.vert", "../assets/shaders/close2gl.frag");
+    Shader c2GLRShader("../assets/shaders/c2glr.vert", "../assets/shaders/c2glr.frag");
+
+    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader);
+    // c2glr.setShader(&c2GLRShader);
 
     bool drawCubeFlag = true;
     bool drawCowGiseleFlag = true;
@@ -262,7 +266,7 @@ int main(){
 
                 gisele.drawTriangles();
             }
-        }else{
+        }else if(arc ==  CLOSE2GL){
             projection = projectionClose2GL;
             view = camera.lookAtClose2GL();
             close2GLShader.use();
@@ -280,6 +284,8 @@ int main(){
                 gisele.drawTrianglesClose2GL();
             }
 
+        }else{
+            c2glr.draw();
         }
         
 
@@ -373,6 +379,7 @@ int main(){
                 ImGui::Indent();{
                     if (ImGui::RadioButton("OPENGL", arc == OPENGL)) { arc = OPENGL; }
                     if (ImGui::RadioButton("CLOSE2GL", arc == CLOSE2GL)) { arc = CLOSE2GL; }
+                    if (ImGui::RadioButton("CLOSE2GLRASTERIZATION", arc == CLOSE2GLRASTERIZATION)) { arc = CLOSE2GLRASTERIZATION; }
                 }
                 ImGui::Unindent();
 
