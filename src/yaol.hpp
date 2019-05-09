@@ -11,13 +11,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <cstdio>
+#include "globalUtils.hpp"
 #include "close2GL.hpp"
 
-struct Close2GLVertex {
-    glm::vec2 Position;
-    glm::vec3 Normal;
-    int colorIndex;
-};
+
 
 struct Vertex {
     glm::vec3 Position;
@@ -156,7 +153,8 @@ public:
         maxy = vertices[0].Position.y;
         minz = vertices[0].Position.z;
         maxz = vertices[0].Position.z;
-        for (unsigned int i = 0; i < vertices.size(); i++){
+        unsigned int vss = this->vertices.size();
+        for (unsigned int i = 0; i < vss; i++){
             minmaxTest(vertices[i].Position);
         }
 
@@ -195,8 +193,9 @@ public:
         glm::vec4 avm;
         Close2GLVertex aav;
         C2GLvertices = std::vector<Close2GLVertex>();
-        C2GLvertices.reserve(this->vertices.size()); // Use reserve, maybe can save some fps in close2gl
-        for(unsigned int yai = 0; yai < vertices.size(); yai++){
+        unsigned int vss = this->vertices.size();
+        C2GLvertices.reserve(vss); // Use reserve, maybe can save some fps in close2gl
+        for(unsigned int yai = 0; yai < vss; yai++){
             avm = glm::vec4(vertices[yai].Position, 1.0f);
             avm = mvp * avm;
             if (avm.w < 0.0f || avm.w == 0.0f || avm.w == -0.0f){

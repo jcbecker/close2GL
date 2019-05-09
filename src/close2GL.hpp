@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "shaderLoader.hpp"
+#include "globalUtils.hpp"
 
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "stb_image.h"
@@ -56,6 +57,9 @@ namespace C2GL{
         std::vector<Close2GLRenderPanelVertex> verticesp;
         unsigned int textureUniform;
         Shader m_Shader;
+        
+        std::vector<Close2GLVertex> giseleVertices;
+        std::vector<Close2GLVertex> cubeVertices;
 
         Close2GlRender(Shader p_Shader) : m_Shader(p_Shader){
             Close2GLRenderPanelVertex aav;

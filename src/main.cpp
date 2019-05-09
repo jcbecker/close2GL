@@ -16,6 +16,7 @@
 
 #include "shaderLoader.hpp"
 #include "camera.hpp"
+#include "globalUtils.hpp"
 
 #include "yaol.hpp"
 #include "imguiUtil.hpp"
@@ -285,6 +286,28 @@ int main(){
             }
 
         }else{
+            projection = projectionClose2GL;
+            view = camera.lookAtClose2GL();
+            
+            glm::vec2 maxs;
+            glm::vec2 mins;
+            unsigned int mfs; 
+
+
+            if(drawCubeFlag){
+                mvp = projection * view * cubeojb.modelClose2GL;
+                cubeojb.updateClose2GLBuffers(mvp);
+                // mfs = cubeojb.C2GLvertices.size();
+                // for (int ii = 0; ii < cubeojb.C2GLvertices.size(); ii++){
+
+                // }
+            }
+
+            if(drawCowGiseleFlag){
+                mvp = projection * view * gisele.modelClose2GL;
+                gisele.updateClose2GLBuffers(mvp);
+            }
+            
             c2glr.draw();
         }
         
