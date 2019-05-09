@@ -117,24 +117,32 @@ namespace C2GL{
             glGenTextures(1, &this->textureUniform);
             glBindTexture(GL_TEXTURE_2D, this->textureUniform); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
             // set the texture wrapping parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             // // set texture filtering parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // load image, create texture and generate mipmaps
-            int width, height, nrChannels;
-            stbi_set_flip_vertically_on_load(true); 
-            // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-            unsigned char *data = stbi_load("../assets/textures/container.jpg", &width, &height, &nrChannels, 0);
-            if (data){
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-                glGenerateMipmap(GL_TEXTURE_2D);
+            
+            unsigned int width, height;
+            width = height = 512;
+            float checkImage[height][width][4];
+            float ri, gi, bi;
+
+            for (int i = 0; i < height; i++) {//checkImageHeight
+                for (int j = 0; j < width; j++) {//checkImageWidth
+                    ri = (i*j)/(float)(512*512);
+                    gi = i/(float) 512;
+                    bi = j/(float) 512;
+                    checkImage[i][j][0] = (float) gi;
+                    checkImage[i][j][1] = (float) gi;
+                    checkImage[i][j][2] = (float) gi;
+                    checkImage[i][j][3] = (float) 1.0f;
+                }
             }
-            else{
-                std::cout << "Failed to load texture1" << std::endl;
-            }
-            stbi_image_free(data);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,  GL_FLOAT, checkImage);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            
 
             this->m_Shader.use();
             this->m_Shader.setInt("texture1", 0);
