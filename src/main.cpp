@@ -84,6 +84,7 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
+    int cscr_w=SCR_WIDTH, cscr_h=SCR_HEIGHT;
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
     RendererLayer mRenderer = RendererLayer();
     glm::mat4 view;
@@ -92,6 +93,7 @@ int main(){
     glm::mat4 projectionsymmetric;
     glm::mat4 projectionClose2GL;
     glm::mat4 mvp;
+    glm::mat4 viewPortMatrix;
     bool show_demo_window = false;
     Renderer arc = OPENGL;
     bool useLight = false;
@@ -130,15 +132,13 @@ int main(){
     Shader close2GLShader("../assets/shaders/close2gl.vert", "../assets/shaders/close2gl.frag");
     Shader c2GLRShader("../assets/shaders/c2glr.vert", "../assets/shaders/c2glr.frag");
 
-    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader);
-    // c2glr.setShader(&c2GLRShader);
-
     bool drawCubeFlag = true;
     bool drawCowGiseleFlag = true;
-    ImVec4 objImColors = ImVec4(0.7f, 0.7f, 0.7f, 1.0f); //Clear color
+    glm::vec4 objImColors = glm::vec4(0.7f, 0.7f, 0.7f, 1.0f);
+    glm::vec4 clear_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.00f); //Clear color
 
+    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader, cscr_w, cscr_h, clear_color);
 
-    int cscr_w=SCR_WIDTH, cscr_h=SCR_HEIGHT;
     bool showMainMenu = true;
 
     bool no_titlebar = false;
@@ -163,9 +163,6 @@ int main(){
     if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
     if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
     if (no_close)           p_open = NULL;
-
-    // Imgui variables
-    ImVec4 clear_color = ImVec4(0.2f, 0.2f, 0.2f, 1.00f); //Clear color
 
     // OpenGL primitives options
     //{GL_FRONT_AND_BACK, GL_FRONT, GL_BACK}, {GL_POINT, GL_LINE, GL_FILL}
@@ -272,16 +269,21 @@ int main(){
             view = camera.lookAtClose2GL();
             close2GLShader.use();
             close2GLShader.setVec3("uColor", colorObejects);
+            viewPortMatrix = C2GL::getViewPortMatrix(1, 1);
             
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
-                cubeojb.updateClose2GLBuffers(mvp);
+                cubeojb.updateClose2GLVertices(mvp);
+                // cubeojb.updateClose2GLVertices(mvp, viewPortMatrix);
+                cubeojb.updateClose2GLBuffers();
                 cubeojb.drawTrianglesClose2GL();
             }
 
             if(drawCowGiseleFlag){
                 mvp = projection * view * gisele.modelClose2GL;
-                gisele.updateClose2GLBuffers(mvp);
+                gisele.updateClose2GLVertices(mvp);
+                // gisele.updateClose2GLVertices(mvp, viewPortMatrix);
+                gisele.updateClose2GLBuffers();
                 gisele.drawTrianglesClose2GL();
             }
 
@@ -296,16 +298,21 @@ int main(){
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
-                cubeojb.updateClose2GLBuffers(mvp);
+                cubeojb.updateClose2GLVertices(mvp);
+                // To-Do: copy the vector to Close2GL
                 // mfs = cubeojb.C2GLvertices.size();
                 // for (int ii = 0; ii < cubeojb.C2GLvertices.size(); ii++){
 
                 // }
             }
 
-            if(drawCowGiseleFlag){
+            // if(drawCowGiseleFlag){
+            // To-do: Active the if above
+            if (false){
                 mvp = projection * view * gisele.modelClose2GL;
-                gisele.updateClose2GLBuffers(mvp);
+                gisele.updateClose2GLVertices(mvp);
+                // To-Do: copy the vector to Close2GL
+
             }
             
             c2glr.draw();
@@ -539,7 +546,7 @@ int main(){
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
-    std::cout << "Alert, window size changed to " << width << " x " << height << "\n";
+    std::cout << "Alert: window size changed to " << width << " x " << height << "\n";
     glViewport(0, 0, width, height);
 }
 

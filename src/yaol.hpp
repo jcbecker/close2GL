@@ -189,7 +189,7 @@ public:
         glGenBuffers(1, &C2GLVBO);
     }
 
-    void updateClose2GLBuffers(glm::mat4 mvp){
+    void updateClose2GLVertices(glm::mat4 mvp){
         glm::vec4 avm;
         Close2GLVertex aav;
         C2GLvertices = std::vector<Close2GLVertex>();
@@ -208,7 +208,19 @@ public:
                 C2GLvertices.push_back(aav);
             }
         }
+    }
 
+    void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport){
+        updateClose2GLVertices(mvp);
+        unsigned int vss = this->C2GLvertices.size();
+        for(unsigned int yai = 0; yai < vss; yai++){
+            this->C2GLvertices[yai].Position = glm::vec2(vport * glm::vec4(this->C2GLvertices[yai].Position, 0.0f, 0.0f));
+        }
+
+    }
+
+
+    void updateClose2GLBuffers(){
         glBindVertexArray(C2GLVAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, C2GLVBO);

@@ -45,6 +45,19 @@ namespace C2GL{
         return proj;
     }
 
+    glm::mat4 getViewPortMatrix (unsigned int w, unsigned int h){
+        // [w/2   0   w/2+x]
+        // [ 0   h/2  h/2+y]
+        // [ 0    0     1  ]
+        glm::mat4 vp = glm::mat4(1.0f);
+        vp[0][0] = (float)w/(float)2;
+        vp[1][1] = (float)h/(float)2;
+        vp[3][0] = ((float)w/(float)2) + 1.0f;
+        vp[3][1] = ((float)h/(float)2) + 1.0f;
+
+        return vp;
+    }
+
     // Struct for the 2d pannel with texture (immutable)
     struct Close2GLRenderPanelVertex {
         glm::vec2 Position;
@@ -61,39 +74,77 @@ namespace C2GL{
         std::vector<Close2GLVertex> giseleVertices;
         std::vector<Close2GLVertex> cubeVertices;
 
-        Close2GlRender(Shader p_Shader) : m_Shader(p_Shader){
+        int scrW, scrH;
+
+        glm::vec4 mClearColor;
+
+        std::vector<glm::vec4> mColorBuffer;
+        std::vector<float> mZBuffer;
+
+
+
+
+        Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor) : m_Shader(p_Shader){
             Close2GLRenderPanelVertex aav;
             aav.Position = glm::vec2(-1.0f, -1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(0.0f, 0.0f);
             verticesp.push_back(aav);
 
             aav.Position = glm::vec2(1.0f, -1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(1.0f, 0.0f);
             verticesp.push_back(aav);
 
             aav.Position = glm::vec2(1.0f, 1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(1.0f, 1.0f);
             verticesp.push_back(aav);
 
             aav.Position = glm::vec2(1.0f, 1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(1.0f, 1.0f);
             verticesp.push_back(aav);
 
             aav.Position = glm::vec2(-1.0f, 1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(0.0f, 1.0f);
             verticesp.push_back(aav);
 
             aav.Position = glm::vec2(-1.0f, -1.0f);
-            aav.Position = aav.Position * 0.5f;
+            // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(0.0f, 0.0f);
             verticesp.push_back(aav);
 
+            this->scrW = i_scrW;
+            this->scrH = i_scrH;
+
+            this->mClearColor = i_clearColor;
+
+            this->mColorBuffer = std::vector<glm::vec4>();
+            this->mColorBuffer.reserve(this->scrW * this->scrH);
+
+            this->mZBuffer = std::vector<float>();
+            this->mZBuffer.reserve(this->scrW * this->scrH);
+
+            for (int i = 0; i < this->scrH; i++) {
+                for (int j = 0; j < this->scrW; j++) {
+                    float rc = mClearColor.r;
+                    float gc = mClearColor.g;
+                    float bc = mClearColor.b;
+                    mClearColor.r;
+                    this->mColorBuffer.push_back(glm::vec4(rc, gc, bc, 1.0f));
+                }
+            }
+            
+            setPixelColor(this->scrW-1, this->scrH-1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            
+
             generateClose2GLVAOVBO();
+        }
+
+        void setPixelColor(int x, int y, glm::vec4 color){
+            this->mColorBuffer[x + this->scrW * y] = color;
         }
 
         void generateClose2GLVAOVBO(){
@@ -126,25 +177,8 @@ namespace C2GL{
             // // set texture filtering parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            
-            unsigned int width, height;
-            width = height = 512;
-            float checkImage[height][width][4];
-            float ri, gi, bi;
 
-            for (int i = 0; i < height; i++) {//checkImageHeight
-                for (int j = 0; j < width; j++) {//checkImageWidth
-                    ri = (i*j)/(float)(512*512);
-                    gi = i/(float) 512;
-                    bi = j/(float) 512;
-                    checkImage[i][j][0] = (float) gi;
-                    checkImage[i][j][1] = (float) gi;
-                    checkImage[i][j][2] = (float) gi;
-                    checkImage[i][j][3] = (float) 1.0f;
-                }
-            }
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,  GL_FLOAT, checkImage);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
             glGenerateMipmap(GL_TEXTURE_2D);
             
 
