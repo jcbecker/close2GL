@@ -137,7 +137,7 @@ int main(){
     glm::vec4 objImColors = glm::vec4(0.7f, 0.7f, 0.7f, 1.0f);
     glm::vec4 clear_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.00f); //Clear color
 
-    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader, cscr_w, cscr_h, clear_color);
+    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader, cscr_w, cscr_h, clear_color, objImColors);
 
     bool showMainMenu = true;
 
@@ -274,7 +274,6 @@ int main(){
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
                 cubeojb.updateClose2GLVertices(mvp);
-                // cubeojb.updateClose2GLVertices(mvp, viewPortMatrix);
                 cubeojb.updateClose2GLBuffers();
                 cubeojb.drawTrianglesClose2GL();
             }
@@ -282,39 +281,33 @@ int main(){
             if(drawCowGiseleFlag){
                 mvp = projection * view * gisele.modelClose2GL;
                 gisele.updateClose2GLVertices(mvp);
-                // gisele.updateClose2GLVertices(mvp, viewPortMatrix);
                 gisele.updateClose2GLBuffers();
                 gisele.drawTrianglesClose2GL();
             }
 
         }else{
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             projection = projectionClose2GL;
             view = camera.lookAtClose2GL();
             
-            glm::vec2 maxs;
-            glm::vec2 mins;
-            unsigned int mfs; 
-
+            c2glr.clearTextureColor();
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
                 cubeojb.updateClose2GLVertices(mvp);
-                // To-Do: copy the vector to Close2GL
-                // mfs = cubeojb.C2GLvertices.size();
-                // for (int ii = 0; ii < cubeojb.C2GLvertices.size(); ii++){
-
-                // }
-            }
-
-            // if(drawCowGiseleFlag){
-            // To-do: Active the if above
-            if (false){
-                mvp = projection * view * gisele.modelClose2GL;
-                gisele.updateClose2GLVertices(mvp);
-                // To-Do: copy the vector to Close2GL
+                c2glr.rasterize(cubeojb.C2GLvertices);
 
             }
             
+            if (drawCowGiseleFlag){
+                mvp = projection * view * gisele.modelClose2GL;
+                gisele.updateClose2GLVertices(mvp);
+                c2glr.rasterize(gisele.C2GLvertices);
+
+
+            }
+            
+            c2glr.updateTextureInGPU();
             c2glr.draw();
         }
         

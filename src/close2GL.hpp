@@ -77,6 +77,7 @@ namespace C2GL{
         int scrW, scrH;
 
         glm::vec4 mClearColor;
+        glm::vec4 mObjectColor;
 
         std::vector<glm::vec4> mColorBuffer;
         std::vector<float> mZBuffer;
@@ -84,7 +85,7 @@ namespace C2GL{
 
 
 
-        Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor) : m_Shader(p_Shader){
+        Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor) : m_Shader(p_Shader){
             Close2GLRenderPanelVertex aav;
             aav.Position = glm::vec2(-1.0f, -1.0f);
             // aav.Position = aav.Position * 0.5f;
@@ -120,6 +121,7 @@ namespace C2GL{
             this->scrH = i_scrH;
 
             this->mClearColor = i_clearColor;
+            this->mObjectColor = i_objectColor;
 
             this->mColorBuffer = std::vector<glm::vec4>();
             this->mColorBuffer.reserve(this->scrW * this->scrH);
@@ -145,6 +147,22 @@ namespace C2GL{
 
         void setPixelColor(int x, int y, glm::vec4 color){
             this->mColorBuffer[x + this->scrW * y] = color;
+        }
+
+        void clearTextureColor(){
+            for (int i = 0; i < this->scrH; i++) {
+                for (int j = 0; j < this->scrW; j++) {
+                    setPixelColor(j, i, mClearColor);
+                }
+            }
+        }
+
+        void setTextureColor(glm::vec4 nColor){
+            for (int i = 0; i < this->scrH; i++) {
+                for (int j = 0; j < this->scrW; j++) {
+                    setPixelColor(j, i, nColor);
+                }
+            }
         }
 
         void generateClose2GLVAOVBO(){
@@ -180,10 +198,37 @@ namespace C2GL{
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
             glGenerateMipmap(GL_TEXTURE_2D);
-            
+
 
             this->m_Shader.use();
             this->m_Shader.setInt("texture1", 0);
+        }
+
+        void updateTextureInGPU(){
+            glBindTexture(GL_TEXTURE_2D, this->textureUniform);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->scrW, this->scrH, GL_RGBA, GL_FLOAT, this->mColorBuffer.data());
+        }
+
+        void rasterize(std::vector<Close2GLVertex> vertices){
+            unsigned int vs = vertices.size();
+            float tx, ty;
+            int ix, iy;
+            for(int i = 0; i <  vs; i++){
+                tx = vertices[i].Position.x;
+                ty = vertices[i].Position.y;
+                tx += 1.0f;
+                ty += 1.0f;
+                tx = tx * ((float) this->scrW  / (float) 2);
+                ty = ty * ((float) this->scrH  / (float) 2);
+                ix = tx;
+                iy = ty;
+                if(ix > 0 && ix < this->scrW && iy > 0 && iy < this->scrH){
+                    setPixelColor(ix, iy, this->mObjectColor);
+                }else{
+                    std::cout << "Alert: Pixel out of range\n\n";
+                }
+            }
+
         }
 
         // void setShader(Shader * p_shader){
