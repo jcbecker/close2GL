@@ -82,6 +82,7 @@ namespace C2GL{
         std::vector<glm::vec4> mColorBuffer;
         std::vector<float> mZBuffer;
 
+        std::vector<RasterizerVertex> verticeStack;
 
 
 
@@ -138,14 +139,84 @@ namespace C2GL{
                     this->mColorBuffer.push_back(glm::vec4(rc, gc, bc, 1.0f));
                 }
             }
+
+            verticeStack = std::vector<RasterizerVertex>();
             
-            setPixelColor(this->scrW-1, this->scrH-1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             
 
             generateClose2GLVAOVBO();
         }
 
+        void vertice2RasterizerStack(RasterizerVertex v){
+            verticeStack.push_back(v);
+            if (verticeStack.size() == 3){
+                rasterizeTriangle();
+                // To clear the stack
+                verticeStack = std::vector<RasterizerVertex>();
+            }
+
+        }
+
+        void rasterizeTriangle(){
+            // for(int i = 0; i < 3; i++){
+            //     setPixelColor((int) verticeStack[i].Position.x, (int) verticeStack[i].Position.y, this->mObjectColor);
+            // }
+
+            //ascending sorting using y-axis
+            glm::vec2 v0 = verticeStack[0].Position;
+            glm::vec2 v1 = verticeStack[1].Position;
+            glm::vec2 v2 = verticeStack[2].Position;
+            
+            
+            if (v0.y > v1.y) std::swap(v0, v1);
+            if (v0.y > v2.y) std::swap(v0, v2);
+            if (v1.y > v2.y) std::swap(v1, v2);
+            
+            int triangleHeight = v2.y - v0.y;
+
+            if (triangleHeight == 0)
+                return;
+            
+            // To-do: remove if bellow
+            if (v0.y == v1.y || v0.y == v2.y || v1.y == v2.y){
+                std::cout << "|";
+                return;
+            }
+
+            for (int y = v0.y; y <= v1.y; y++) {
+                int segmentHeight = v1.y - v0.y + 1;
+                float alpha = (float)(y - v0.y) / triangleHeight;
+                float beta = (float)(y - v0.y) / segmentHeight;
+                glm::vec2 A = v0 + (v2 - v0)*alpha;
+                glm::vec2 B = v0 + (v1 - v0)*beta;
+
+                if (A.x > B.x) std::swap(A, B);
+
+                for (int x = A.x; x <= B.x; x++) {
+                    setPixelColor(x, y,  this->mObjectColor);
+                }
+            }
+
+            for (int y = v1.y; y <= v2.y; y++) {
+                int segmentHeight = v2.y - v1.y + 1;
+                float alpha = (float)(y - v0.y) / triangleHeight;
+                float beta = (float)(y - v1.y) / segmentHeight;
+                glm::vec2 A = v0 + (v2 - v0)*alpha;
+                glm::vec2 B = v1 + (v2 - v1)*beta;
+
+                if (A.x > B.x) std::swap(A, B);
+
+                for (int x = A.x; x <= B.x; x++){
+                    setPixelColor(x, y,  this->mObjectColor);
+                }
+            }
+        }
+
         void setPixelColor(int x, int y, glm::vec4 color){
+            if(x < 0 || x >= this->scrW || y < 0 || y >= this->scrH){
+                std::cout << ".";
+                return;
+            }
             this->mColorBuffer[x + this->scrW * y] = color;
         }
 
@@ -212,7 +283,8 @@ namespace C2GL{
         void rasterize(std::vector<Close2GLVertex> vertices){
             unsigned int vs = vertices.size();
             float tx, ty;
-            int ix, iy;
+            // int ix, iy;
+            RasterizerVertex aav;
             for(int i = 0; i <  vs; i++){
                 tx = vertices[i].Position.x;
                 ty = vertices[i].Position.y;
@@ -220,13 +292,15 @@ namespace C2GL{
                 ty += 1.0f;
                 tx = tx * ((float) this->scrW  / (float) 2);
                 ty = ty * ((float) this->scrH  / (float) 2);
-                ix = tx;
-                iy = ty;
-                if(ix > 0 && ix < this->scrW && iy > 0 && iy < this->scrH){
-                    setPixelColor(ix, iy, this->mObjectColor);
-                }else{
-                    std::cout << "Alert: Pixel out of range\n\n";
-                }
+                aav.Position = glm::vec2(tx, ty);
+                vertice2RasterizerStack(aav);
+                // ix = tx;
+                // iy = ty;
+                // if(ix > 0 && ix < this->scrW && iy > 0 && iy < this->scrH){
+                //     setPixelColor(ix, iy, this->mObjectColor);
+                // }else{
+                //     std::cout << "Alert: Pixel out of range\n\n";
+                // }
             }
 
         }

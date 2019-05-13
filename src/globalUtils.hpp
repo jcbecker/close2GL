@@ -11,6 +11,10 @@ struct Close2GLVertex {
     int colorIndex;
 };
 
+struct RasterizerVertex {
+    glm::vec2 Position;
+};
+
 
 
 #endif
