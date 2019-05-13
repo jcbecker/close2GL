@@ -286,6 +286,7 @@ int main(){
             }
 
         }else{
+            c2glr.setPrimitiveToRasterize(drawPrimitive);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             projection = projectionClose2GL;
             view = camera.lookAtClose2GL();

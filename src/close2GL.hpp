@@ -71,6 +71,9 @@ namespace C2GL{
         unsigned int textureUniform;
         Shader m_Shader;
         
+        //{GL_POINT, GL_LINE, GL_FILL}
+        GLuint rasterizePrimitive;
+        
         std::vector<Close2GLVertex> giseleVertices;
         std::vector<Close2GLVertex> cubeVertices;
 
@@ -87,6 +90,8 @@ namespace C2GL{
 
 
         Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor) : m_Shader(p_Shader){
+            rasterizePrimitive = GL_FILL;
+
             Close2GLRenderPanelVertex aav;
             aav.Position = glm::vec2(-1.0f, -1.0f);
             // aav.Position = aav.Position * 0.5f;
@@ -147,12 +152,66 @@ namespace C2GL{
             generateClose2GLVAOVBO();
         }
 
+        void line(RasterizerVertex v0, RasterizerVertex v1){
+        // void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
+            int x0 = (int) v0.Position.x;
+            int y0 = (int) v0.Position.y;
+
+            int x1 = (int) v1.Position.x;
+            int y1 = (int) v1.Position.y;
+
+            bool steep = false; 
+            if (std::abs(x0-x1)<std::abs(y0-y1)) { 
+                std::swap(x0, y0); 
+                std::swap(x1, y1); 
+                steep = true; 
+            } 
+            if (x0>x1) { 
+                std::swap(x0, x1); 
+                std::swap(y0, y1); 
+            } 
+            int dx = x1-x0; 
+            int dy = y1-y0; 
+            int derror2 = std::abs(dy)*2; 
+            int error2 = 0; 
+            int y = y0; 
+            for (int x=x0; x<=x1; x++) { 
+                if (steep) { 
+                    // image.set(y, x, color);
+                    setPixelColor(y, x,  this->mObjectColor);
+                } else { 
+                    // image.set(x, y, color);
+                    setPixelColor(x, y,  this->mObjectColor);
+                } 
+                error2 += derror2; 
+                if (error2 > dx) { 
+                    y += (y1>y0?1:-1); 
+                    error2 -= dx*2; 
+                } 
+            } 
+        } 
+
         void vertice2RasterizerStack(RasterizerVertex v){
-            verticeStack.push_back(v);
-            if (verticeStack.size() == 3){
-                rasterizeTriangle();
-                // To clear the stack
-                verticeStack = std::vector<RasterizerVertex>();
+            if(rasterizePrimitive == GL_FILL){            
+                verticeStack.push_back(v);
+                if (verticeStack.size() == 3){
+                    rasterizeTriangle();
+                    // To clear the stack
+                    verticeStack = std::vector<RasterizerVertex>();
+                }
+            }else if(rasterizePrimitive == GL_POINT){
+                setPixelColor(v.Position.x, v.Position.y, this->mObjectColor);
+            }else{
+                // setPixelColor(v.Position.x, v.Position.y,  this->mObjectColor);
+                verticeStack.push_back(v);
+                if (verticeStack.size() == 3){
+                    line(verticeStack[0], verticeStack[1]);
+                    line(verticeStack[1], verticeStack[2]);
+                    line(verticeStack[2], verticeStack[0]);
+
+                    // To clear the stack
+                    verticeStack = std::vector<RasterizerVertex>();
+                }
             }
 
         }
@@ -177,12 +236,7 @@ namespace C2GL{
             if (triangleHeight == 0)
                 return;
             
-            // To-do: remove if bellow
-            if (v0.y == v1.y || v0.y == v2.y || v1.y == v2.y){
-                std::cout << "|";
-                return;
-            }
-
+            
             for (int y = v0.y; y <= v1.y; y++) {
                 int segmentHeight = v1.y - v0.y + 1;
                 float alpha = (float)(y - v0.y) / triangleHeight;
@@ -196,7 +250,9 @@ namespace C2GL{
                     setPixelColor(x, y,  this->mObjectColor);
                 }
             }
+            
 
+            
             for (int y = v1.y; y <= v2.y; y++) {
                 int segmentHeight = v2.y - v1.y + 1;
                 float alpha = (float)(y - v0.y) / triangleHeight;
@@ -210,11 +266,16 @@ namespace C2GL{
                     setPixelColor(x, y,  this->mObjectColor);
                 }
             }
+            
+        }
+
+        void setPrimitiveToRasterize(GLuint nrm){
+            this->rasterizePrimitive = nrm;
         }
 
         void setPixelColor(int x, int y, glm::vec4 color){
             if(x < 0 || x >= this->scrW || y < 0 || y >= this->scrH){
-                std::cout << ".";
+                // std::cout << ".";
                 return;
             }
             this->mColorBuffer[x + this->scrW * y] = color;
@@ -226,6 +287,7 @@ namespace C2GL{
                     setPixelColor(j, i, mClearColor);
                 }
             }
+            verticeStack = std::vector<RasterizerVertex>();
         }
 
         void setTextureColor(glm::vec4 nColor){
