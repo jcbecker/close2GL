@@ -286,11 +286,21 @@ int main(){
             }
 
         }else{
+            // Update ClearColor
+            c2glr.updateClearColor(clear_color);
+            // TestResizeBuffer
+            c2glr.testAndResizeBuffers(cscr_w, cscr_h);
+
+
+
+            //set the OpenGL primitive to GL_FILL and pass the primitive variable to rasterizer
             c2glr.setPrimitiveToRasterize(drawPrimitive);
+            c2glr.updateObjectColor(objImColors);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             projection = projectionClose2GL;
             view = camera.lookAtClose2GL();
             
+            //Clear Buffers
             c2glr.clearTextureColor();
 
             if(drawCubeFlag){

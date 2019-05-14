@@ -137,11 +137,7 @@ namespace C2GL{
 
             for (int i = 0; i < this->scrH; i++) {
                 for (int j = 0; j < this->scrW; j++) {
-                    float rc = mClearColor.r;
-                    float gc = mClearColor.g;
-                    float bc = mClearColor.b;
-                    mClearColor.r;
-                    this->mColorBuffer.push_back(glm::vec4(rc, gc, bc, 1.0f));
+                    this->mColorBuffer.push_back(this->mClearColor);
                 }
             }
 
@@ -217,11 +213,7 @@ namespace C2GL{
         }
 
         void rasterizeTriangle(){
-            // for(int i = 0; i < 3; i++){
-            //     setPixelColor((int) verticeStack[i].Position.x, (int) verticeStack[i].Position.y, this->mObjectColor);
-            // }
-
-            //ascending sorting using y-axis
+            // Sorting vertices by height
             glm::vec2 v0 = verticeStack[0].Position;
             glm::vec2 v1 = verticeStack[1].Position;
             glm::vec2 v2 = verticeStack[2].Position;
@@ -290,6 +282,44 @@ namespace C2GL{
             this->mColorBuffer[x + this->scrW * y] = color;
         }
 
+        void updateClearColor(glm::vec4 iic){
+            this->mClearColor = iic;
+        }
+
+        void testAndResizeBuffers(int i_scrW, int i_scrH){
+            if (this->scrW == i_scrW && this->scrH == i_scrH){//No resize buffer is needed
+                return;
+            }
+
+            std::cout << "Alert: Resizing buffers to " << i_scrW << ", " << i_scrH << ".\n";
+
+            this->scrW = i_scrW;
+            this->scrH = i_scrH;
+
+            this->mColorBuffer = std::vector<glm::vec4>();
+            this->mColorBuffer.reserve(this->scrW * this->scrH);
+
+            this->mZBuffer = std::vector<float>();
+            this->mZBuffer.reserve(this->scrW * this->scrH);
+
+            for (int i = 0; i < this->scrH; i++) {
+                for (int j = 0; j < this->scrW; j++) {
+                    this->mColorBuffer.push_back(this->mClearColor);
+                }
+            }
+
+            verticeStack = std::vector<RasterizerVertex>();
+
+            glBindTexture(GL_TEXTURE_2D, this->textureUniform);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
+
+        }
+
+        void updateObjectColor(glm::vec4 i_oc){
+            this->mObjectColor = i_oc;
+        }
+
         void clearTextureColor(){
             for (int i = 0; i < this->scrH; i++) {
                 for (int j = 0; j < this->scrW; j++) {
@@ -330,7 +360,7 @@ namespace C2GL{
 
 
             glGenTextures(1, &this->textureUniform);
-            glBindTexture(GL_TEXTURE_2D, this->textureUniform); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+            glBindTexture(GL_TEXTURE_2D, this->textureUniform);
             // set the texture wrapping parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -365,13 +395,6 @@ namespace C2GL{
                 ty = ty * ((float) this->scrH  / (float) 2);
                 aav.Position = glm::vec2(tx, ty);
                 vertice2RasterizerStack(aav);
-                // ix = tx;
-                // iy = ty;
-                // if(ix > 0 && ix < this->scrW && iy > 0 && iy < this->scrH){
-                //     setPixelColor(ix, iy, this->mObjectColor);
-                // }else{
-                //     std::cout << "Alert: Pixel out of range\n\n";
-                // }
             }
 
         }
