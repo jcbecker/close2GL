@@ -249,44 +249,6 @@ namespace C2GL{
                     setPixelColor(j, v0.y+i,  this->mObjectColor);
                 } 
             }
-
-
-
-
-
-            return;
-            // if (triangleHeight == 0) return;
-            
-            
-            // for (int y = v0.y; y <= v1.y; y++) {
-            //     int segmentHeight = v1.y - v0.y + 1;
-            //     float alpha = (float)(y - v0.y) / triangleHeight;
-            //     float beta = (float)(y - v0.y) / segmentHeight;
-            //     glm::vec4 A = v0 + (v2 - v0)*alpha;
-            //     glm::vec4 B = v0 + (v1 - v0)*beta;
-
-            //     if (A.x > B.x) std::swap(A, B);
-
-            //     for (int x = A.x; x <= B.x; x++) {
-            //         setPixelColor(x, y,  this->mObjectColor);
-            //     }
-            // }
-            
-
-            
-            // for (int y = v1.y; y <= v2.y; y++) {
-            //     int segmentHeight = v2.y - v1.y + 1;
-            //     float alpha = (float)(y - v0.y) / triangleHeight;
-            //     float beta = (float)(y - v1.y) / segmentHeight;
-            //     glm::vec4 A = v0 + (v2 - v0)*alpha;
-            //     glm::vec4 B = v1 + (v2 - v1)*beta;
-
-            //     if (A.x > B.x) std::swap(A, B);
-
-            //     for (int x = A.x; x <= B.x; x++){
-            //         setPixelColor(x, y,  this->mObjectColor);
-            //     }
-            // }
             
         }
 
