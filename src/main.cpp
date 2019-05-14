@@ -101,6 +101,8 @@ int main(){
     bool gouraudSpecular = true;
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glm::vec3 nCowPosition = glm::vec3(0.0, 0.0, 0.0);
     glfwSetWindowUserPointer(window, &camera);
 
     // configure global opengl state
@@ -314,10 +316,10 @@ int main(){
             }
             
             if (drawCowGiseleFlag){
-                mvp = projection * view * gisele.modelClose2GL;
+                c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+                mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
                 gisele.updateClose2GLRasterizationVertices(mvp);
                 c2glr.rasterize(gisele.C2GLRasVert);
-
 
             }
             
@@ -343,6 +345,12 @@ int main(){
                 ImGui::Checkbox("DrawCube", &drawCubeFlag);
                 ImGui::Text("Loaded Cow:");
                 ImGui::Checkbox("Draw Cow", &drawCowGiseleFlag);
+                ImGui::Indent();{
+                    ImGui::SliderFloat("X", &nCowPosition.x, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Y", &nCowPosition.y, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Z", &nCowPosition.z, -20.0f, 20.0f);
+                }
+                ImGui::Unindent();
 
                 ImGui::Text("Objects color:");
                 ImGui::Indent();{

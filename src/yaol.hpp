@@ -249,15 +249,15 @@ public:
 
                 if(clippingSpaceTest(v0) && clippingSpaceTest(v1) && clippingSpaceTest(v2)){
                     // To-do Preserve z, and maybe w
-                    aav.Position = glm::vec2(v0);
+                    aav.Position = v0;
                     C2GLRasVert.push_back(aav);
 
                     // To-do Preserve z, and maybe w
-                    aav.Position = glm::vec2(v1);
+                    aav.Position = v1;
                     C2GLRasVert.push_back(aav);
 
                     // To-do Preserve z, and maybe w
-                    aav.Position = glm::vec2(v2);
+                    aav.Position = v2;
                     C2GLRasVert.push_back(aav);
                 }
             }

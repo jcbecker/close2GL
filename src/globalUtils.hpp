@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define AFTER_FAR_PLANE 2.0f
+
 struct Close2GLVertex {
     glm::vec2 Position;
     glm::vec3 Normal;
@@ -12,7 +14,7 @@ struct Close2GLVertex {
 };
 
 struct RasterizerVertex {
-    glm::vec2 Position;
+    glm::vec4 Position;
 };
 
 

@@ -138,6 +138,7 @@ namespace C2GL{
             for (int i = 0; i < this->scrH; i++) {
                 for (int j = 0; j < this->scrW; j++) {
                     this->mColorBuffer.push_back(this->mClearColor);
+                    this->mZBuffer.push_back(AFTER_FAR_PLANE);
                 }
             }
 
@@ -214,9 +215,9 @@ namespace C2GL{
 
         void rasterizeTriangle(){
             // Sorting vertices by height
-            glm::vec2 v0 = verticeStack[0].Position;
-            glm::vec2 v1 = verticeStack[1].Position;
-            glm::vec2 v2 = verticeStack[2].Position;
+            glm::vec4 v0 = verticeStack[0].Position;
+            glm::vec4 v1 = verticeStack[1].Position;
+            glm::vec4 v2 = verticeStack[2].Position;
             
             v0.x = (int) v0.x;
             v0.y = (int) v0.y;
@@ -227,46 +228,65 @@ namespace C2GL{
             v2.x = (int) v2.x;
             v2.y = (int) v2.y;
 
-            
+            if (v0.y == v1.y && v0.y == v2.y) return;
+
             if (v0.y > v1.y) std::swap(v0, v1);
             if (v0.y > v2.y) std::swap(v0, v2);
             if (v1.y > v2.y) std::swap(v1, v2);
             
-            int triangleHeight = v2.y - v0.y;
+            int total_height = v2.y - v0.y;
 
-            if (triangleHeight == 0)
-                return;
-            
-            
-            for (int y = v0.y; y <= v1.y; y++) {
-                int segmentHeight = v1.y - v0.y + 1;
-                float alpha = (float)(y - v0.y) / triangleHeight;
-                float beta = (float)(y - v0.y) / segmentHeight;
-                glm::vec2 A = v0 + (v2 - v0)*alpha;
-                glm::vec2 B = v0 + (v1 - v0)*beta;
-
-                if (A.x > B.x) std::swap(A, B);
-
-                for (int x = A.x; x <= B.x; x++) {
-                    setPixelColor(x, y,  this->mObjectColor);
-                }
+            for (int i=0; i<total_height; i++) { 
+                bool second_half = i > v1.y-v0.y || v1.y==v0.y; 
+                int segment_height = second_half ? v2.y - v1.y : v1.y-v0.y; 
+                float alpha = (float)i/total_height; 
+                float beta  = (float)(i-(second_half ? v1.y-v0.y : 0))/segment_height;
+                glm::vec4 A =               v0 + (v2 - v0)*alpha; 
+                glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta; 
+                if (A.x > B.x) std::swap(A, B); 
+                for (int j=A.x; j<=B.x; j++) { 
+                    // image.set(j, v0.y+i, color); // attention, due to int casts t0.y+i != A.y 
+                    setPixelColor(j, v0.y+i,  this->mObjectColor);
+                } 
             }
+
+
+
+
+
+            return;
+            // if (triangleHeight == 0) return;
+            
+            
+            // for (int y = v0.y; y <= v1.y; y++) {
+            //     int segmentHeight = v1.y - v0.y + 1;
+            //     float alpha = (float)(y - v0.y) / triangleHeight;
+            //     float beta = (float)(y - v0.y) / segmentHeight;
+            //     glm::vec4 A = v0 + (v2 - v0)*alpha;
+            //     glm::vec4 B = v0 + (v1 - v0)*beta;
+
+            //     if (A.x > B.x) std::swap(A, B);
+
+            //     for (int x = A.x; x <= B.x; x++) {
+            //         setPixelColor(x, y,  this->mObjectColor);
+            //     }
+            // }
             
 
             
-            for (int y = v1.y; y <= v2.y; y++) {
-                int segmentHeight = v2.y - v1.y + 1;
-                float alpha = (float)(y - v0.y) / triangleHeight;
-                float beta = (float)(y - v1.y) / segmentHeight;
-                glm::vec2 A = v0 + (v2 - v0)*alpha;
-                glm::vec2 B = v1 + (v2 - v1)*beta;
+            // for (int y = v1.y; y <= v2.y; y++) {
+            //     int segmentHeight = v2.y - v1.y + 1;
+            //     float alpha = (float)(y - v0.y) / triangleHeight;
+            //     float beta = (float)(y - v1.y) / segmentHeight;
+            //     glm::vec4 A = v0 + (v2 - v0)*alpha;
+            //     glm::vec4 B = v1 + (v2 - v1)*beta;
 
-                if (A.x > B.x) std::swap(A, B);
+            //     if (A.x > B.x) std::swap(A, B);
 
-                for (int x = A.x; x <= B.x; x++){
-                    setPixelColor(x, y,  this->mObjectColor);
-                }
-            }
+            //     for (int x = A.x; x <= B.x; x++){
+            //         setPixelColor(x, y,  this->mObjectColor);
+            //     }
+            // }
             
         }
 
@@ -305,6 +325,7 @@ namespace C2GL{
             for (int i = 0; i < this->scrH; i++) {
                 for (int j = 0; j < this->scrW; j++) {
                     this->mColorBuffer.push_back(this->mClearColor);
+                    this->mZBuffer.push_back(AFTER_FAR_PLANE);
                 }
             }
 
@@ -327,6 +348,22 @@ namespace C2GL{
                 }
             }
             verticeStack = std::vector<RasterizerVertex>();
+        }
+
+        void setPixelDeph(int x, int y, float dephV){
+            if(x < 0 || x >= this->scrW || y < 0 || y >= this->scrH){
+                // std::cout << ".";
+                return;
+            }
+            this->mZBuffer[x + this->scrW * y] = dephV;
+        }
+
+        void clearZBufferC2GL(){
+            for (int i = 0; i < this->scrH; i++) {
+                for (int j = 0; j < this->scrW; j++) {
+                    setPixelDeph(j, i, AFTER_FAR_PLANE);
+                }
+            }
         }
 
         void setTextureColor(glm::vec4 nColor){
@@ -393,7 +430,7 @@ namespace C2GL{
                 ty += 1.0f;
                 tx = tx * ((float) this->scrW  / (float) 2);
                 ty = ty * ((float) this->scrH  / (float) 2);
-                aav.Position = glm::vec2(tx, ty);
+                aav.Position = glm::vec4(tx, ty, vertices[i].Position.z, vertices[i].Position.w);
                 vertice2RasterizerStack(aav);
             }
 
