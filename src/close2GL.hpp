@@ -226,6 +226,15 @@ namespace C2GL{
             glm::vec2 v1 = verticeStack[1].Position;
             glm::vec2 v2 = verticeStack[2].Position;
             
+            v0.x = (int) v0.x;
+            v0.y = (int) v0.y;
+
+            v1.x = (int) v1.x;
+            v1.y = (int) v1.y;
+
+            v2.x = (int) v2.x;
+            v2.y = (int) v2.y;
+
             
             if (v0.y > v1.y) std::swap(v0, v1);
             if (v0.y > v2.y) std::swap(v0, v2);
