@@ -52,8 +52,8 @@ namespace C2GL{
         glm::mat4 vp = glm::mat4(1.0f);
         vp[0][0] = (float)w/(float)2;
         vp[1][1] = (float)h/(float)2;
-        vp[3][0] = ((float)w/(float)2) + 1.0f;// + 0.0f ?
-        vp[3][1] = ((float)h/(float)2) + 1.0f;
+        vp[3][0] = ((float)w/(float)2);// + 1.0f;// + 0.0f ?
+        vp[3][1] = ((float)h/(float)2);// + 1.0f;
 
         return vp;
     }
@@ -395,10 +395,6 @@ namespace C2GL{
             for(int i = 0; i <  vs; i++){
                 tx = vertices[i].Position.x;
                 ty = vertices[i].Position.y;
-                tx += 1.0f;
-                ty += 1.0f;
-                tx = tx * ((float) this->scrW  / (float) 2);
-                ty = ty * ((float) this->scrH  / (float) 2);
                 aav.Position = glm::vec4(tx, ty, vertices[i].Position.z, vertices[i].Position.w);
                 vertice2RasterizerStack(aav);
             }

@@ -310,7 +310,7 @@ int main(){
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
-                cubeojb.updateClose2GLRasterizationVertices(mvp);
+                cubeojb.updateClose2GLVertices(mvp, viewPortMatrix);
                 c2glr.rasterize(cubeojb.C2GLRasVert);
 
             }
@@ -318,7 +318,7 @@ int main(){
             if (drawCowGiseleFlag){
                 c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
                 mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
-                gisele.updateClose2GLRasterizationVertices(mvp);
+                gisele.updateClose2GLVertices(mvp, viewPortMatrix);
                 c2glr.rasterize(gisele.C2GLRasVert);
 
             }

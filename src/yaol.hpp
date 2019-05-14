@@ -288,10 +288,10 @@ public:
     }
 
     void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport){
-        updateClose2GLVertices(mvp);
-        unsigned int vss = this->C2GLvertices.size();
+        updateClose2GLRasterizationVertices(mvp);
+        unsigned int vss = this->C2GLRasVert.size();
         for(unsigned int yai = 0; yai < vss; yai++){
-            this->C2GLvertices[yai].Position = glm::vec2(vport * glm::vec4(this->C2GLvertices[yai].Position, 0.0f, 0.0f));
+            this->C2GLRasVert[yai].Position = vport * this->C2GLRasVert[yai].Position;
         }
 
     }
