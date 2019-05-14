@@ -236,18 +236,17 @@ namespace C2GL{
             
             int total_height = v2.y - v0.y;
 
-            for (int i=0; i<total_height; i++) { 
-                bool second_half = i > v1.y-v0.y || v1.y==v0.y; 
-                int segment_height = second_half ? v2.y - v1.y : v1.y-v0.y; 
-                float alpha = (float)i/total_height; 
+            for (int i=0; i<total_height; i++) {
+                bool second_half = i > v1.y-v0.y || v1.y==v0.y;
+                int segment_height = second_half ? v2.y - v1.y : v1.y-v0.y;
+                float alpha = (float)i/total_height;
                 float beta  = (float)(i-(second_half ? v1.y-v0.y : 0))/segment_height;
-                glm::vec4 A =               v0 + (v2 - v0)*alpha; 
-                glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta; 
-                if (A.x > B.x) std::swap(A, B); 
-                for (int j=A.x; j<=B.x; j++) { 
-                    // image.set(j, v0.y+i, color); // attention, due to int casts t0.y+i != A.y 
+                glm::vec4 A =               v0 + (v2 - v0)*alpha;
+                glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta;
+                if (A.x > B.x) std::swap(A, B);
+                for (int j=A.x; j<=B.x; j++) {
                     setPixelColor(j, v0.y+i,  this->mObjectColor);
-                } 
+                }
             }
             
         }
@@ -318,6 +317,14 @@ namespace C2GL{
                 return;
             }
             this->mZBuffer[x + this->scrW * y] = dephV;
+        }
+
+        float getPixelDeph(int x, int y){
+            if(x < 0 || x >= this->scrW || y < 0 || y >= this->scrH){
+                std::cout << "Error: Wrong screen Cordinate.\n\n";
+                exit(EXIT_FAILURE);
+            }
+            return this->mZBuffer[x + this->scrW * y];
         }
 
         void clearZBufferC2GL(){
