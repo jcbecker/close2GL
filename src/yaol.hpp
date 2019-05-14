@@ -244,19 +244,22 @@ public:
                 // continue;
             }else{
                 v0 = v0/v0.w;
-                // To-do Preserve z, and maybe w
-                aav.Position = glm::vec2(v0);
-                C2GLRasVert.push_back(aav);
-
                 v1 = v1/v1.w;
-                // To-do Preserve z, and maybe w
-                aav.Position = glm::vec2(v1);
-                C2GLRasVert.push_back(aav);
-
                 v2 = v2/v2.w;
-                // To-do Preserve z, and maybe w
-                aav.Position = glm::vec2(v2);
-                C2GLRasVert.push_back(aav);
+
+                if(clippingSpaceTest(v0) && clippingSpaceTest(v1) && clippingSpaceTest(v2)){
+                    // To-do Preserve z, and maybe w
+                    aav.Position = glm::vec2(v0);
+                    C2GLRasVert.push_back(aav);
+
+                    // To-do Preserve z, and maybe w
+                    aav.Position = glm::vec2(v1);
+                    C2GLRasVert.push_back(aav);
+
+                    // To-do Preserve z, and maybe w
+                    aav.Position = glm::vec2(v2);
+                    C2GLRasVert.push_back(aav);
+                }
             }
         }
 
@@ -276,6 +279,12 @@ public:
 
     bool wClippingTest(float iw){
         return (iw < 0.0f || iw == 0.0f || iw == -0.0f);
+    }
+
+    bool clippingSpaceTest(glm::vec4 vtt){
+        return (vtt.z > -1.0 && vtt.z < 1.0 &&
+        vtt.x > -1.0 && vtt.x < 1.0 &&
+        vtt.y > -1.0 && vtt.y < 1.0);
     }
 
     void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport){
