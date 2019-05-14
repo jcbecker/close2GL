@@ -44,6 +44,8 @@ public:
     glm::mat4 modelClose2GL;
 
 
+    std::vector<RasterizerVertex> C2GLRasVert;
+
     void minmaxTest(glm::vec3 vtt){
         if (minx > vtt.x) minx = vtt.x;
         if (miny > vtt.y) miny = vtt.y;
@@ -208,6 +210,72 @@ public:
                 C2GLvertices.push_back(aav);
             }
         }
+    }
+
+    void updateClose2GLRasterizationVertices(glm::mat4 mvp){
+        glm::vec4 v0, v1, v2;
+        RasterizerVertex aav;
+        C2GLRasVert = std::vector<RasterizerVertex>();
+        unsigned int vss = this->vertices.size();
+        C2GLRasVert.reserve(vss); // Use reserve, maybe can save some fps in close2gl
+        
+        //debug1
+        // if(vss%3){
+        //     std::cout << "debug1: " << vss << ": não divisível.\n";
+        // }else{
+        //     std::cout << "debug1: " << vss << ": Divisível.\n";
+        // }
+        
+        if(vss%3){
+            std::cout << "Erro, vertex to rasterize dont represent a mesh of triangles!\n\n";
+            exit(EXIT_FAILURE);
+        }
+        
+        for(unsigned int yai = 0; yai < vss; yai+=3){
+            v0 = glm::vec4(vertices[yai].Position, 1.0f);
+            v1 = glm::vec4(vertices[yai + 1].Position, 1.0f);
+            v2 = glm::vec4(vertices[yai + 2].Position, 1.0f);
+
+            v0 = mvp * v0;
+            v1 = mvp * v1;
+            v2 = mvp * v2;
+
+            if (wClippingTest(v0.w) || wClippingTest(v1.w) || wClippingTest(v2.w)){
+                // continue;
+            }else{
+                v0 = v0/v0.w;
+                // To-do Preserve z, and maybe w
+                aav.Position = glm::vec2(v0);
+                C2GLRasVert.push_back(aav);
+
+                v1 = v1/v1.w;
+                // To-do Preserve z, and maybe w
+                aav.Position = glm::vec2(v1);
+                C2GLRasVert.push_back(aav);
+
+                v2 = v2/v2.w;
+                // To-do Preserve z, and maybe w
+                aav.Position = glm::vec2(v2);
+                C2GLRasVert.push_back(aav);
+            }
+        }
+
+        //debug2
+        // if(C2GLRasVert.size()%3){
+        //     std::cout << "debug2: " << C2GLRasVert.size() << ": não divisível.\n";
+        // }else{
+        //     std::cout << "debug2: " << C2GLRasVert.size() << ": Divisível.\n";
+        // }
+
+        if(C2GLRasVert.size()%3){
+            std::cout << "Erro, vertex to rasterize dont represent a mesh of triangles!\n\n";
+            exit(EXIT_FAILURE);
+        }
+
+    }
+
+    bool wClippingTest(float iw){
+        return (iw < 0.0f || iw == 0.0f || iw == -0.0f);
     }
 
     void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport){

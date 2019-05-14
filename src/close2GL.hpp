@@ -52,7 +52,7 @@ namespace C2GL{
         glm::mat4 vp = glm::mat4(1.0f);
         vp[0][0] = (float)w/(float)2;
         vp[1][1] = (float)h/(float)2;
-        vp[3][0] = ((float)w/(float)2) + 1.0f;
+        vp[3][0] = ((float)w/(float)2) + 1.0f;// + 0.0f ?
         vp[3][1] = ((float)h/(float)2) + 1.0f;
 
         return vp;
@@ -381,7 +381,7 @@ namespace C2GL{
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->scrW, this->scrH, GL_RGBA, GL_FLOAT, this->mColorBuffer.data());
         }
 
-        void rasterize(std::vector<Close2GLVertex> vertices){
+        void rasterize(std::vector<RasterizerVertex> vertices){
             unsigned int vs = vertices.size();
             float tx, ty;
             // int ix, iy;

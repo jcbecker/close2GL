@@ -269,7 +269,7 @@ int main(){
             view = camera.lookAtClose2GL();
             close2GLShader.use();
             close2GLShader.setVec3("uColor", colorObejects);
-            viewPortMatrix = C2GL::getViewPortMatrix(1, 1);
+            
             
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
@@ -286,6 +286,9 @@ int main(){
             }
 
         }else{
+            //getViewportMatrix
+            viewPortMatrix = C2GL::getViewPortMatrix(cscr_w, cscr_h);
+
             // Update ClearColor
             c2glr.updateClearColor(clear_color);
             // TestResizeBuffer
@@ -305,15 +308,15 @@ int main(){
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
-                cubeojb.updateClose2GLVertices(mvp);
-                c2glr.rasterize(cubeojb.C2GLvertices);
+                cubeojb.updateClose2GLRasterizationVertices(mvp);
+                c2glr.rasterize(cubeojb.C2GLRasVert);
 
             }
             
             if (drawCowGiseleFlag){
                 mvp = projection * view * gisele.modelClose2GL;
-                gisele.updateClose2GLVertices(mvp);
-                c2glr.rasterize(gisele.C2GLvertices);
+                gisele.updateClose2GLRasterizationVertices(mvp);
+                c2glr.rasterize(gisele.C2GLRasVert);
 
 
             }
