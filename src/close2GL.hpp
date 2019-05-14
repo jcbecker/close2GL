@@ -150,7 +150,6 @@ namespace C2GL{
         }
 
         void line(RasterizerVertex v0, RasterizerVertex v1){
-        // void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
             int x0 = (int) v0.Position.x;
             int y0 = (int) v0.Position.y;
 
@@ -173,11 +172,9 @@ namespace C2GL{
             int error2 = 0; 
             int y = y0; 
             for (int x=x0; x<=x1; x++) { 
-                if (steep) { 
-                    // image.set(y, x, color);
+                if (steep) {
                     setPixelColor(y, x,  this->mObjectColor);
-                } else { 
-                    // image.set(x, y, color);
+                } else {
                     setPixelColor(x, y,  this->mObjectColor);
                 } 
                 error2 += derror2; 
