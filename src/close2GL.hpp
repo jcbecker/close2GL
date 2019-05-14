@@ -245,7 +245,10 @@ namespace C2GL{
                 glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta;
                 if (A.x > B.x) std::swap(A, B);
                 for (int j=A.x; j<=B.x; j++) {
-                    setPixelColor(j, v0.y+i,  this->mObjectColor);
+                    if(getPixelDeph(j, v0.y+i) > A.z){
+                        setPixelDeph(j, v0.y+i, A.z);
+                        setPixelColor(j, v0.y+i,  this->mObjectColor);
+                    }
                 }
             }
             
@@ -367,12 +370,6 @@ namespace C2GL{
 
             glGenTextures(1, &this->textureUniform);
             glBindTexture(GL_TEXTURE_2D, this->textureUniform);
-            // set the texture wrapping parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            // // set texture filtering parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
             glGenerateMipmap(GL_TEXTURE_2D);

@@ -307,6 +307,7 @@ int main(){
             
             //Clear Buffers
             c2glr.clearTextureColor();
+            c2glr.clearZBufferC2GL();
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
