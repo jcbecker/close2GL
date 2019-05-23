@@ -247,16 +247,13 @@ public:
                 v1 = v1/v1.w;
                 v2 = v2/v2.w;
 
-                if(clippingSpaceTest(v0) && clippingSpaceTest(v1) && clippingSpaceTest(v2)){
-                    // To-do Preserve z, and maybe w
+                if (clippingSpaceTest(v0) && clippingSpaceTest(v1) && clippingSpaceTest(v2)){
                     aav.Position = v0;
                     C2GLRasVert.push_back(aav);
-
-                    // To-do Preserve z, and maybe w
+                    
                     aav.Position = v1;
                     C2GLRasVert.push_back(aav);
-
-                    // To-do Preserve z, and maybe w
+                    
                     aav.Position = v2;
                     C2GLRasVert.push_back(aav);
                 }

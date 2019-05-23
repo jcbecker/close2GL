@@ -64,6 +64,15 @@ namespace C2GL{
         glm::vec2 TextureCoord;
     };
 
+    float areaOfTriangle(glm::vec2 v0, glm::vec2 v1, glm::vec2 v2){
+        float a = v0.x * v1.y - v1.x * v0.y;
+             a += v1.x * v2.y - v2.x * v1.y;
+             a += v2.x * v0.y - v0.x * v2.y;
+        
+        return a * 0.5f;
+    }
+
+
     class Close2GlRender{
     public:
         GLuint C2GLRVAO, C2GLRVBO;
@@ -73,6 +82,10 @@ namespace C2GL{
         
         //{GL_POINT, GL_LINE, GL_FILL}
         GLuint rasterizePrimitive;
+
+        GLuint faceCulling;
+        GLuint orientationMode;
+        bool backFaceCullingFlag;
         
         std::vector<Close2GLVertex> giseleVertices;
         std::vector<Close2GLVertex> cubeVertices;
@@ -122,7 +135,12 @@ namespace C2GL{
             // aav.Position = aav.Position * 0.5f;
             aav.TextureCoord = glm::vec2(0.0f, 0.0f);
             verticesp.push_back(aav);
+            
 
+            GLuint faceCulling = GL_BACK;
+            GLuint orientationMode = GL_CCW;
+            bool backFaceCullingFlag = false;
+            
             this->scrW = i_scrW;
             this->scrH = i_scrH;
 
@@ -189,7 +207,9 @@ namespace C2GL{
             if(rasterizePrimitive == GL_FILL){            
                 verticeStack.push_back(v);
                 if (verticeStack.size() == 3){
-                    rasterizeTriangle();
+                    if(!CullFaceStack()){
+                        rasterizeTriangle();
+                    }
                     // To clear the stack
                     verticeStack = std::vector<RasterizerVertex>();
                 }
@@ -199,15 +219,27 @@ namespace C2GL{
                 // setPixelColor(v.Position.x, v.Position.y,  this->mObjectColor);
                 verticeStack.push_back(v);
                 if (verticeStack.size() == 3){
-                    line(verticeStack[0], verticeStack[1]);
-                    line(verticeStack[1], verticeStack[2]);
-                    line(verticeStack[2], verticeStack[0]);
-
+                    if(!CullFaceStack()){
+                        line(verticeStack[0], verticeStack[1]);
+                        line(verticeStack[1], verticeStack[2]);
+                        line(verticeStack[2], verticeStack[0]);
+                    }
                     // To clear the stack
                     verticeStack = std::vector<RasterizerVertex>();
                 }
             }
 
+        }
+
+        bool CullFaceStack(){
+            if (!backFaceCullingFlag) return false;
+            float a = areaOfTriangle(glm::vec2(verticeStack[0].Position), glm::vec2(verticeStack[1].Position), glm::vec2(verticeStack[2].Position));
+            if (orientationMode == GL_CCW){
+                return a < 0.0f;
+            }
+            else{
+                return !(a < 0.0f);
+            }
         }
 
         void rasterizeTriangle(){

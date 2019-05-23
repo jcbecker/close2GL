@@ -171,6 +171,7 @@ int main(){
     GLuint drawPrimitive = GL_FILL;
     GLuint faceCulling = GL_BACK;
     GLuint orientationMode = GL_CCW;
+    bool backFaceCullingFlag = false;
     glPolygonMode(GL_FRONT, drawPrimitive);
     // Render loop
     glfwSwapInterval(0);
@@ -234,6 +235,11 @@ int main(){
         
         //  Draw Cals
         if(arc ==  OPENGL){
+            if(backFaceCullingFlag){
+                glEnable(GL_CULL_FACE);
+            }else{
+                glDisable(GL_CULL_FACE);
+            }
             projection = projectionsymmetric;
             view = camera.GetViewMatrix();
             loadObjectShader.use();
@@ -288,6 +294,7 @@ int main(){
             }
 
         }else{
+            glDisable(GL_CULL_FACE);
             //getViewportMatrix
             viewPortMatrix = C2GL::getViewPortMatrix(cscr_w, cscr_h);
 
@@ -295,6 +302,10 @@ int main(){
             c2glr.updateClearColor(clear_color);
             // TestResizeBuffer
             c2glr.testAndResizeBuffers(cscr_w, cscr_h);
+
+            c2glr.faceCulling = faceCulling;
+            c2glr.orientationMode = orientationMode;
+            c2glr.backFaceCullingFlag = backFaceCullingFlag;
 
 
 
@@ -317,7 +328,7 @@ int main(){
             }
             
             if (drawCowGiseleFlag){
-                c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+                // c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
                 mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
                 gisele.updateClose2GLVertices(mvp, viewPortMatrix);
                 c2glr.rasterize(gisele.C2GLRasVert);
@@ -386,14 +397,17 @@ int main(){
                 }
                 ImGui::Unindent();
 
-                ImGui::BulletText("Cull Face");
+                ImGui::BulletText("BackFace Culling");
                 ImGui::Indent();{
-                    if (ImGui::Button("Enable bf")) {
-                        glEnable(GL_CULL_FACE);
-                    } ImGui::SameLine();
-                    if (ImGui::Button("Disable bf")) {
-                        glDisable(GL_CULL_FACE);
-                    }
+                    // if (ImGui::Button("Enable BFCulling")) {
+                    //     // glEnable(GL_CULL_FACE);
+                    //     backFaceCullingFlag = true;
+                    // } ImGui::SameLine();
+                    // if (ImGui::Button("Disable BFCulling")) {
+                    //     // glDisable(GL_CULL_FACE);
+                    //     backFaceCullingFlag = false;
+                    // }
+                    ImGui::Checkbox("BackFaceCulling Flag", &backFaceCullingFlag);
                 }
                 ImGui::Unindent();
 
