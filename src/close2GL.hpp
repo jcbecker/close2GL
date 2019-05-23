@@ -274,8 +274,10 @@ namespace C2GL{
                 glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta;
                 if (A.x > B.x) std::swap(A, B);
                 for (int j=A.x; j<=B.x; j++) {
-                    if(getPixelDeph(j, v0.y+i) > A.z){
-                        setPixelDeph(j, v0.y+i, A.z);
+                    float aprop = (float) (B.x - j) / (float) (B.x - A.x);
+                    float dFragment = glm::mix(B.z, A.z, aprop);
+                    if(getPixelDeph(j, v0.y+i) > dFragment){
+                        setPixelDeph(j, v0.y+i, dFragment);
                         setPixelColor(j, v0.y+i,  this->mObjectColor);
                     }
                 }
