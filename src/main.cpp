@@ -266,8 +266,9 @@ int main(){
 
 
             if(drawCowGiseleFlag){
+                loadObjectShader.setVec3("uColor" , glm::vec3(1.0f, 0.0f, 0.0f));
                 loadObjectShader.setMat4("model", gisele.modelMatrix);
-                mvp = projection * view * gisele.modelMatrix;
+                mvp = projection * view * glm::translate(gisele.modelMatrix, nCowPosition * 100.0f);
                 loadObjectShader.setMat4("mvp", mvp);
 
                 gisele.drawTriangles();
@@ -328,7 +329,7 @@ int main(){
             }
             
             if (drawCowGiseleFlag){
-                // c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+                c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
                 mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
                 gisele.updateClose2GLVertices(mvp, viewPortMatrix);
                 c2glr.rasterize(gisele.C2GLRasVert);
