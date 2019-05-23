@@ -533,9 +533,9 @@ int main(){
                 ImGui::ColorEdit3("Light color", (float*)&lightColor);
                 ImGui::BulletText("Light position");
                 ImGui::Indent();{
-                    ImGui::SliderFloat("X", &lightPosition.x, -20.0f, 20.0f);
-                    ImGui::SliderFloat("Y", &lightPosition.y, -20.0f, 20.0f);
-                    ImGui::SliderFloat("Z", &lightPosition.z, -20.0f, 20.0f);
+                    ImGui::SliderFloat("X##lp", &lightPosition.x, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Y##lp", &lightPosition.y, -20.0f, 20.0f);
+                    ImGui::SliderFloat("Z##lp", &lightPosition.z, -20.0f, 20.0f);
                 }
                 ImGui::Unindent();
             }
