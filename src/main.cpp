@@ -31,8 +31,11 @@ static void errorCallback(int error, const char* description);
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // Global variables, Note is experimental version of cgpg, later this gonna change
-const unsigned int SCR_WIDTH = 104 * 16;
-const unsigned int SCR_HEIGHT = 104 * 9;
+// const unsigned int SCR_WIDTH = 104 * 16;
+// const unsigned int SCR_HEIGHT = 104 * 9;
+
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1020;
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -99,7 +102,7 @@ int main(){
     bool useLight = false;
     bool isGouraud = false;
     bool gouraudSpecular = true;
-    glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 4.0f);
+    glm::vec3 lightPosition = glm::vec3(2.0f, 2.0f, 2.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
     glm::vec3 nCowPosition = glm::vec3(0.0, 0.0, 0.0);
@@ -267,7 +270,7 @@ int main(){
 
             if(drawCowGiseleFlag){
                 loadObjectShader.setVec3("uColor" , glm::vec3(1.0f, 0.0f, 0.0f));
-                loadObjectShader.setMat4("model", gisele.modelMatrix);
+                loadObjectShader.setMat4("model", glm::translate(gisele.modelMatrix, nCowPosition * 100.0f));
                 mvp = projection * view * glm::translate(gisele.modelMatrix, nCowPosition * 100.0f);
                 loadObjectShader.setMat4("mvp", mvp);
 

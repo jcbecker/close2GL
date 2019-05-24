@@ -6,6 +6,7 @@ layout (location = 1) in vec3 aNormal;
 out vec3 Normal;
 out vec3 FragPos;
 out vec3 LightingColor;
+// out vec3 LightPosViewSpace;
 
 uniform vec3 lightPos;
 uniform vec3 lcolor;
@@ -23,8 +24,8 @@ void main(){
     gl_Position = mvp * vec4(aPos, 1.0);
 
     if(useLight && isGouraud){
-        vec3 Position = vec3(model * vec4(aPos, 1.0));
-        vec3 cNormal = mat3(transpose(inverse(model))) * aNormal;
+        vec3 Position = vec3(view * model * vec4(aPos, 1.0));
+        vec3 cNormal = mat3(transpose(inverse(view * model))) * aNormal;
         
         // ambient
         float ambientStrength = 0.3;
@@ -41,16 +42,17 @@ void main(){
         if (!gouraudSpecular){
             specularStrength = 0.0;
         }
-        vec3 viewDir = normalize(viewPos - Position);
-        vec3 reflectDir = reflect(-lightDir, norm);  
+        vec3 viewDir = normalize( - Position);
+        vec3 reflectDir = reflect(-lightDir, norm);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        vec3 specular = specularStrength * spec * lcolor;      
+        vec3 specular = specularStrength * spec * lcolor;
 
         LightingColor = ambient + diffuse + specular;
     }else{
         LightingColor = vec3(1, 1, 1);
     }
 
-    Normal = mat3(transpose(inverse(model))) * aNormal; 
-    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(transpose(inverse(view * model))) * aNormal;
+    FragPos = vec3(view * model * vec4(aPos, 1.0));
+    // LightPosViewSpace = vec3(vec4(lightPos, 1.0));
 }

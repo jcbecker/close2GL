@@ -2,7 +2,8 @@
 
 in vec3 Normal;
 in vec3 FragPos;
-in vec3 LightingColor; 
+in vec3 LightingColor;
+// in vec3 LightPosViewSpace;
 
 out vec4 FragColor;
 
@@ -17,13 +18,15 @@ void main(){
     if(useLight && !isGouraud){
         float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * lcolor;
+
+        
         vec3 norm = normalize(Normal);
         vec3 lightDir = normalize(lightPos - FragPos);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * lcolor;
 
         float specularStrength = 0.5;
-        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 viewDir = normalize(- FragPos);
         vec3 reflectDir = reflect(-lightDir, norm); 
 
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
