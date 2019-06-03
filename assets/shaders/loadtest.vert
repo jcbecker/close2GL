@@ -10,7 +10,7 @@ out vec3 LightingColor;
 
 uniform vec3 lightPos;
 uniform vec3 lcolor;
-uniform vec3 viewPos;
+// uniform vec3 viewPos;
 uniform bool useLight;
 uniform bool isGouraud;
 uniform bool gouraudSpecular;

@@ -15,6 +15,7 @@ struct Close2GLVertex {
 
 struct RasterizerVertex {
     glm::vec4 Position;
+    glm::vec3 Normal;
 };
 
 

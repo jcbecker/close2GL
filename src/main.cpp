@@ -31,11 +31,11 @@ static void errorCallback(int error, const char* description);
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // Global variables, Note is experimental version of cgpg, later this gonna change
-// const unsigned int SCR_WIDTH = 104 * 16;
-// const unsigned int SCR_HEIGHT = 104 * 9;
+const unsigned int SCR_WIDTH = 104 * 16;
+const unsigned int SCR_HEIGHT = 104 * 9;
 
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1020;
+// const unsigned int SCR_WIDTH = 1920;
+// const unsigned int SCR_HEIGHT = 1020;
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -252,7 +252,7 @@ int main(){
 
             loadObjectShader.setVec3("lcolor", lightColor);
             loadObjectShader.setVec3("lightPos", lightPosition);
-            loadObjectShader.setVec3("viewPos", camera.Position);
+            // loadObjectShader.setVec3("viewPos", camera.Position);
             loadObjectShader.setBool("useLight", useLight);
             loadObjectShader.setBool("isGouraud", isGouraud);
             loadObjectShader.setBool("gouraudSpecular", gouraudSpecular);
@@ -326,7 +326,7 @@ int main(){
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
-                cubeojb.updateClose2GLVertices(mvp, viewPortMatrix);
+                cubeojb.updateClose2GLVertices(mvp, viewPortMatrix, cubeojb.modelClose2GL, view);
                 c2glr.rasterize(cubeojb.C2GLRasVert);
 
             }
@@ -334,7 +334,9 @@ int main(){
             if (drawCowGiseleFlag){
                 c2glr.updateObjectColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
                 mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
-                gisele.updateClose2GLVertices(mvp, viewPortMatrix);
+                // gisele.updateClose2GLVertices(mvp, viewPortMatrix, gisele.modelClose2GL, view); To-Do: Use this
+                gisele.updateClose2GLVertices(mvp, viewPortMatrix, glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f), view);
+
                 c2glr.rasterize(gisele.C2GLRasVert);
 
             }

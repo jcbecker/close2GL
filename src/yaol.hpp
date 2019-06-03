@@ -212,8 +212,10 @@ public:
         }
     }
 
-    void updateClose2GLRasterizationVertices(glm::mat4 mvp){
-        glm::vec4 v0, v1, v2;
+    void updateClose2GLRasterizationVertices(glm::mat4 mvp, glm::mat4 model, glm::mat4 view){
+        // vec3 cNormal = mat3(transpose(inverse(view * model))) * aNormal;
+        glm::mat3 viewModelInvTrans = glm::mat3(glm::transpose(glm::inverse(view * model)));
+        RasterizerVertex v0, v1, v2;
         RasterizerVertex aav;
         C2GLRasVert = std::vector<RasterizerVertex>();
         unsigned int vss = this->vertices.size();
@@ -232,29 +234,38 @@ public:
         }
         
         for(unsigned int yai = 0; yai < vss; yai+=3){
-            v0 = glm::vec4(vertices[yai].Position, 1.0f);
-            v1 = glm::vec4(vertices[yai + 1].Position, 1.0f);
-            v2 = glm::vec4(vertices[yai + 2].Position, 1.0f);
+            v0.Position = glm::vec4(vertices[yai].Position, 1.0f);
+            v1.Position = glm::vec4(vertices[yai + 1].Position, 1.0f);
+            v2.Position = glm::vec4(vertices[yai + 2].Position, 1.0f);
+            
+            v0.Normal = glm::vec4(vertices[yai].Normal, 1.0f);
+            v1.Normal = glm::vec4(vertices[yai + 1].Normal, 1.0f);
+            v2.Normal = glm::vec4(vertices[yai + 2].Normal, 1.0f);
 
-            v0 = mvp * v0;
-            v1 = mvp * v1;
-            v2 = mvp * v2;
+            v0.Position = mvp * v0.Position;
+            v1.Position = mvp * v1.Position;
+            v2.Position = mvp * v2.Position;
 
-            if (wClippingTest(v0.w) || wClippingTest(v1.w) || wClippingTest(v2.w)){
+            // vec3 cNormal = mat3(transpose(inverse(view * model))) * aNormal;
+            v0.Normal = viewModelInvTrans * v0.Normal;
+            v1.Normal = viewModelInvTrans * v1.Normal;
+            v2.Normal = viewModelInvTrans * v2.Normal;
+
+            if (wClippingTest(v0.Position.w) || wClippingTest(v1.Position.w) || wClippingTest(v2.Position.w)){
                 // continue;
             }else{
-                v0 = v0/v0.w;
-                v1 = v1/v1.w;
-                v2 = v2/v2.w;
+                v0.Position = v0.Position/v0.Position.w;
+                v1.Position = v1.Position/v1.Position.w;
+                v2.Position = v2.Position/v2.Position.w;
 
-                if (clippingSpaceTest(v0) && clippingSpaceTest(v1) && clippingSpaceTest(v2)){
-                    aav.Position = v0;
+                if (clippingSpaceTest(v0.Position) && clippingSpaceTest(v1.Position) && clippingSpaceTest(v2.Position)){
+                    aav = v0;
                     C2GLRasVert.push_back(aav);
                     
-                    aav.Position = v1;
+                    aav = v1;
                     C2GLRasVert.push_back(aav);
                     
-                    aav.Position = v2;
+                    aav = v2;
                     C2GLRasVert.push_back(aav);
                 }
             }
@@ -284,8 +295,8 @@ public:
         vtt.y > -1.0 && vtt.y < 1.0);
     }
 
-    void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport){
-        updateClose2GLRasterizationVertices(mvp);
+    void updateClose2GLVertices(glm::mat4 mvp, glm::mat4 vport, glm::mat4 model, glm::mat4 view){
+        updateClose2GLRasterizationVertices(mvp, model, view);
         unsigned int vss = this->C2GLRasVert.size();
         for(unsigned int yai = 0; yai < vss; yai++){
             this->C2GLRasVert[yai].Position = vport * this->C2GLRasVert[yai].Position;

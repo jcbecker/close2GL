@@ -100,6 +100,29 @@ namespace C2GL{
 
         std::vector<RasterizerVertex> verticeStack;
 
+        // uniform vec3 lightPos;
+        glm::vec3 lightPosition; // Light position in CCS
+
+        // uniform vec3 lcolor;
+        glm::vec4 lightColor;
+        
+        // uniform bool useLight;
+        bool useLight = false;
+        
+        // uniform bool isGouraud;
+        bool isGouraud;
+
+        // uniform bool gouraudSpecular;
+        bool gouraudSpecular = true;
+
+        // uniform mat4 model;
+        glm::mat4 model;
+        
+        // uniform mat4 view;
+        glm::mat4 view;
+        
+        // uniform mat4 projection;
+        glm::mat4 projection;
 
 
         Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor) : m_Shader(p_Shader){
@@ -244,41 +267,49 @@ namespace C2GL{
 
         void rasterizeTriangle(){
             // Sorting vertices by height
-            glm::vec4 v0 = verticeStack[0].Position;
-            glm::vec4 v1 = verticeStack[1].Position;
-            glm::vec4 v2 = verticeStack[2].Position;
+            RasterizerVertex v0 = verticeStack[0];
+            RasterizerVertex v1 = verticeStack[1];
+            RasterizerVertex v2 = verticeStack[2];
             
-            v0.x = (int) v0.x;
-            v0.y = (int) v0.y;
+            v0.Position.x = (int) v0.Position.x;
+            v0.Position.y = (int) v0.Position.y;
 
-            v1.x = (int) v1.x;
-            v1.y = (int) v1.y;
+            v1.Position.x = (int) v1.Position.x;
+            v1.Position.y = (int) v1.Position.y;
 
-            v2.x = (int) v2.x;
-            v2.y = (int) v2.y;
+            v2.Position.x = (int) v2.Position.x;
+            v2.Position.y = (int) v2.Position.y;
 
-            if (v0.y == v1.y && v0.y == v2.y) return;
+            if (v0.Position.y == v1.Position.y && v0.Position.y == v2.Position.y) return;
 
-            if (v0.y > v1.y) std::swap(v0, v1);
-            if (v0.y > v2.y) std::swap(v0, v2);
-            if (v1.y > v2.y) std::swap(v1, v2);
+            if (v0.Position.y > v1.Position.y) std::swap(v0, v1);
+            if (v0.Position.y > v2.Position.y) std::swap(v0, v2);
+            if (v1.Position.y > v2.Position.y) std::swap(v1, v2);
             
-            int total_height = v2.y - v0.y;
+            int total_height = v2.Position.y - v0.Position.y;
 
             for (int i=0; i<total_height; i++) {
-                bool second_half = i > v1.y-v0.y || v1.y==v0.y;
-                int segment_height = second_half ? v2.y - v1.y : v1.y-v0.y;
+                bool second_half = i > v1.Position.y-v0.Position.y || v1.Position.y==v0.Position.y;
+
+                int segment_height = second_half ? v2.Position.y - v1.Position.y : v1.Position.y-v0.Position.y;
+                // alpha is the proportion of i in total height
                 float alpha = (float)i/total_height;
-                float beta  = (float)(i-(second_half ? v1.y-v0.y : 0))/segment_height;
-                glm::vec4 A =               v0 + (v2 - v0)*alpha;
-                glm::vec4 B = second_half ? v1 + (v2 - v1)*beta : v0 + (v1-v0)*beta;
+
+                // beta is the proportion of i in the actual segment height
+                float beta  = (float)(i-(second_half ? v1.Position.y-v0.Position.y : 0))/segment_height;
+
+                // A a vector from v0 to v2 scaled by alpha
+                glm::vec4 A =               v0.Position + (v2.Position - v0.Position)*alpha;
+
+                // B a vector from v1 to v2 scaled by beta, or a vecor to v0 to v1 scaled by beta 
+                glm::vec4 B = second_half ? v1.Position + (v2.Position - v1.Position)*beta : v0.Position + (v1.Position-v0.Position)*beta;
                 if (A.x > B.x) std::swap(A, B);
                 for (int j=A.x; j<=B.x; j++) {
                     float aprop = (float) (B.x - j) / (float) (B.x - A.x);
                     float dFragment = glm::mix(B.z, A.z, aprop);
-                    if(getPixelDeph(j, v0.y+i) > dFragment){
-                        setPixelDeph(j, v0.y+i, dFragment);
-                        setPixelColor(j, v0.y+i,  this->mObjectColor);
+                    if(getPixelDeph(j, v0.Position.y+i) > dFragment){
+                        setPixelDeph(j, v0.Position.y+i, dFragment);
+                        setPixelColor(j, v0.Position.y+i,  this->mObjectColor);
                     }
                 }
             }
