@@ -16,6 +16,14 @@ struct Close2GLVertex {
 struct RasterizerVertex {
     glm::vec4 Position;
     glm::vec3 Normal;
+    glm::vec3 OriginalPos;
+};
+
+struct InRasterizerVertex {
+    glm::vec4 Position;
+    glm::vec3 Normal;
+    glm::vec4 Color;
+    glm::vec3 OriginalPos;
 };
 
 

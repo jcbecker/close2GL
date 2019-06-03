@@ -324,9 +324,18 @@ int main(){
             c2glr.clearTextureColor();
             c2glr.clearZBufferC2GL();
 
+            // Set uniform equivalent options for close2GL
+            c2glr.useLight = useLight;
+            c2glr.isGouraud = isGouraud;
+            c2glr.view = view;
+            c2glr.lightColor = lightColor;
+            c2glr.lightPosition = lightPosition;
+            c2glr.gouraudSpecular = gouraudSpecular;
+
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
                 cubeojb.updateClose2GLVertices(mvp, viewPortMatrix, cubeojb.modelClose2GL, view);
+                c2glr.model = cubeojb.modelClose2GL;
                 c2glr.rasterize(cubeojb.C2GLRasVert);
 
             }
@@ -336,7 +345,8 @@ int main(){
                 mvp = projection * view * glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
                 // gisele.updateClose2GLVertices(mvp, viewPortMatrix, gisele.modelClose2GL, view); To-Do: Use this
                 gisele.updateClose2GLVertices(mvp, viewPortMatrix, glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f), view);
-
+                // c2glr.model = gisele.modelClose2GL; To-Do: Use this line
+                c2glr.model = glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
                 c2glr.rasterize(gisele.C2GLRasVert);
 
             }

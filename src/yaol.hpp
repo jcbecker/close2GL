@@ -237,6 +237,10 @@ public:
             v0.Position = glm::vec4(vertices[yai].Position, 1.0f);
             v1.Position = glm::vec4(vertices[yai + 1].Position, 1.0f);
             v2.Position = glm::vec4(vertices[yai + 2].Position, 1.0f);
+
+            v0.OriginalPos = glm::vec4(vertices[yai].Position, 1.0f);
+            v1.OriginalPos = glm::vec4(vertices[yai + 1].Position, 1.0f);
+            v2.OriginalPos = glm::vec4(vertices[yai + 2].Position, 1.0f);
             
             v0.Normal = glm::vec4(vertices[yai].Normal, 1.0f);
             v1.Normal = glm::vec4(vertices[yai + 1].Normal, 1.0f);

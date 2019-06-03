@@ -265,11 +265,61 @@ namespace C2GL{
             }
         }
 
+        // Receive a vertex, shade his color and return the same vertex
+
+        // To-do calculate matrix multiplication out of virtual shader
+        InRasterizerVertex vertexShading(InRasterizerVertex v){
+            //Calculate Gouraud Shading
+            if(this->useLight && this->isGouraud){
+                v.OriginalPos = glm::vec3(this->view  * this->model * glm::vec4(v.OriginalPos, 1.0f));
+
+                // ambient
+                float ambientStrength = 0.3;
+                glm::vec3 ambient = ambientStrength * this->lightColor;
+
+                // diffuse 
+                v.Normal = glm::normalize(v.Normal);
+                glm::vec3 lightDir = glm::normalize(this->lightPosition - v.OriginalPos);
+                float diff = glm::max(glm::dot(v.Normal, lightDir), 0.0f);
+                glm::vec3 diffuse = diff * this->lightColor;
+
+                // specular
+                float specularStrength = 0.8;
+                if(!(this->gouraudSpecular)){
+                    specularStrength = 0.0;
+                }
+                glm::vec3 viewDir = glm::normalize( - v.OriginalPos);
+                glm::vec3 reflectDir = glm::reflect(-lightDir, v.Normal);
+                float spec = glm::pow(glm::max(glm::dot(viewDir, reflectDir), 0.0f), 32);
+                glm::vec3 specular = specularStrength * spec * this->lightColor;
+
+                glm::vec3 LightingColor = ambient + diffuse + specular;
+
+                v.Color = glm::vec4(LightingColor, 1.0f) * v.Color;
+            }
+            
+            return v;
+        }
+
         void rasterizeTriangle(){
             // Sorting vertices by height
-            RasterizerVertex v0 = verticeStack[0];
-            RasterizerVertex v1 = verticeStack[1];
-            RasterizerVertex v2 = verticeStack[2];
+            InRasterizerVertex v0, v1, v2;
+
+            v0.Position = verticeStack[0].Position;
+            v1.Position = verticeStack[1].Position;
+            v2.Position = verticeStack[2].Position;
+
+            v0.Normal = verticeStack[0].Normal;
+            v1.Normal = verticeStack[1].Normal;
+            v2.Normal = verticeStack[2].Normal;
+
+            v0.OriginalPos = verticeStack[0].OriginalPos;
+            v1.OriginalPos = verticeStack[1].OriginalPos;
+            v2.OriginalPos = verticeStack[2].OriginalPos;
+
+            v0.Color = this->mObjectColor;
+            v1.Color = this->mObjectColor;
+            v2.Color = this->mObjectColor;
             
             v0.Position.x = (int) v0.Position.x;
             v0.Position.y = (int) v0.Position.y;
@@ -281,6 +331,12 @@ namespace C2GL{
             v2.Position.y = (int) v2.Position.y;
 
             if (v0.Position.y == v1.Position.y && v0.Position.y == v2.Position.y) return;
+            
+            // Vertex shader program
+            v0 = vertexShading(v0);
+            v1 = vertexShading(v1);
+            v2 = vertexShading(v2);
+            
 
             if (v0.Position.y > v1.Position.y) std::swap(v0, v1);
             if (v0.Position.y > v2.Position.y) std::swap(v0, v2);
@@ -290,8 +346,8 @@ namespace C2GL{
 
             for (int i=0; i<total_height; i++) {
                 bool second_half = i > v1.Position.y-v0.Position.y || v1.Position.y==v0.Position.y;
-
                 int segment_height = second_half ? v2.Position.y - v1.Position.y : v1.Position.y-v0.Position.y;
+
                 // alpha is the proportion of i in total height
                 float alpha = (float)i/total_height;
 
@@ -303,13 +359,46 @@ namespace C2GL{
 
                 // B a vector from v1 to v2 scaled by beta, or a vecor to v0 to v1 scaled by beta 
                 glm::vec4 B = second_half ? v1.Position + (v2.Position - v1.Position)*beta : v0.Position + (v1.Position-v0.Position)*beta;
+                
                 if (A.x > B.x) std::swap(A, B);
                 for (int j=A.x; j<=B.x; j++) {
                     float aprop = (float) (B.x - j) / (float) (B.x - A.x);
-                    float dFragment = glm::mix(B.z, A.z, aprop);
-                    if(getPixelDeph(j, v0.Position.y+i) > dFragment){
-                        setPixelDeph(j, v0.Position.y+i, dFragment);
-                        setPixelColor(j, v0.Position.y+i,  this->mObjectColor);
+                    float zFragment = glm::mix(B.z, A.z, aprop);
+                    int pix, piy;
+                    pix = j;
+                    piy = v0.Position.y+i;
+
+                    // To-do: remove from for some of the lines below
+                    float Px, Py, Yv0, Yv1, Yv2, Xv0, Xv1, Xv2, Wv0, Wv1, Wv2;
+                    Px = (float) pix;
+                    Py = (float) piy;
+
+                    Xv0 = (float) v0.Position.x;
+                    Yv0 = (float) v0.Position.y;
+
+                    Xv1 = (float) v1.Position.x;
+                    Yv1 = (float) v1.Position.y;
+
+                    Xv2 = (float) v2.Position.x;
+                    Yv2 = (float) v2.Position.y;
+
+                    float dem;
+                    dem = (Yv1 - Yv2) * (Xv0 - Xv2) + (Xv2 - Xv1) * (Yv0 - Yv2);
+
+                    Wv0 = (Yv1 - Yv2) * (Px - Xv2) + (Xv2 - Xv1) * (Py - Yv2);
+                    Wv0 = Wv0 / dem;
+
+                    Wv1 = (Yv2 - Yv0) * (Px - Xv2) + (Xv0 - Xv2) * (Py - Yv2);
+                    Wv1 = Wv1/dem;
+
+                    Wv2 = 1 - Wv0 - Wv1;
+
+                    glm::vec4 pColor;
+                    pColor = v0.Color * Wv0 + v1.Color * Wv1 + v2.Color * Wv2;
+
+                    if(getPixelDeph(pix, piy) > zFragment){
+                        setPixelDeph(pix, piy, zFragment);
+                        setPixelColor(pix, piy,  pColor);
                     }
                 }
             }
@@ -448,13 +537,9 @@ namespace C2GL{
 
         void rasterize(std::vector<RasterizerVertex> vertices){
             unsigned int vs = vertices.size();
-            float tx, ty;
-            // int ix, iy;
             RasterizerVertex aav;
             for(int i = 0; i <  vs; i++){
-                tx = vertices[i].Position.x;
-                ty = vertices[i].Position.y;
-                aav.Position = glm::vec4(tx, ty, vertices[i].Position.z, vertices[i].Position.w);
+                aav = vertices[i];
                 vertice2RasterizerStack(aav);
             }
 
