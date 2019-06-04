@@ -100,6 +100,8 @@ namespace C2GL{
 
         std::vector<RasterizerVertex> verticeStack;
 
+        bool perspecCorection;
+
         // uniform vec3 lightPos;
         glm::vec3 lightPosition; // Light position in CCS
 
@@ -271,7 +273,7 @@ namespace C2GL{
         InRasterizerVertex vertexShading(InRasterizerVertex v){
             //Calculate Gouraud Shading
             if(this->useLight && this->isGouraud){
-                v.OriginalPos = glm::vec3(this->view  * this->model * glm::vec4(v.OriginalPos, 1.0f));
+                glm::vec3 vvposition = glm::vec3(this->view  * this->model * glm::vec4(v.OriginalPos, 1.0f));
 
                 // ambient
                 float ambientStrength = 0.3;
@@ -279,7 +281,7 @@ namespace C2GL{
 
                 // diffuse 
                 v.Normal = glm::normalize(v.Normal);
-                glm::vec3 lightDir = glm::normalize(this->lightPosition - v.OriginalPos);
+                glm::vec3 lightDir = glm::normalize(this->lightPosition - vvposition);
                 float diff = glm::max(glm::dot(v.Normal, lightDir), 0.0f);
                 glm::vec3 diffuse = diff * this->lightColor;
 
@@ -288,7 +290,7 @@ namespace C2GL{
                 if(!(this->gouraudSpecular)){
                     specularStrength = 0.0;
                 }
-                glm::vec3 viewDir = glm::normalize( - v.OriginalPos);
+                glm::vec3 viewDir = glm::normalize( - vvposition);
                 glm::vec3 reflectDir = glm::reflect(-lightDir, v.Normal);
                 float spec = glm::pow(glm::max(glm::dot(viewDir, reflectDir), 0.0f), 32);
                 glm::vec3 specular = specularStrength * spec * this->lightColor;
@@ -336,6 +338,21 @@ namespace C2GL{
             v0 = vertexShading(v0);
             v1 = vertexShading(v1);
             v2 = vertexShading(v2);
+
+            //Debug Begin
+            // v0.Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            // v1.Color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+            // v2.Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            if(this->perspecCorection){
+                glm::vec4 PosFixTest = this->projection * this->view  * this->model * glm::vec4(v0.OriginalPos, 1.0f);
+                std::cout << "Start Debug:\n";
+                std::cout << "ScreenPos: (" << v0.Position.x << ", " <<  v0.Position.y << ", " <<  v0.Position.z << ", " <<  v0.Position.w << ")\n";
+                std::cout << "Clip: (" << PosFixTest.x << ", " <<  PosFixTest.y << ", " <<  PosFixTest.z << ", " <<  PosFixTest.w << ")\n";
+                // std::cout << "View: (" << v0.OriginalPos.x << ", " <<  v0.OriginalPos.y << ", " <<  v0.OriginalPos.z << ")\n";
+                std::cout << "End Debug:\n\n";
+
+            }
+            //Debug End
             
 
             if (v0.Position.y > v1.Position.y) std::swap(v0, v1);
@@ -399,6 +416,7 @@ namespace C2GL{
                     if(getPixelDeph(pix, piy) > zFragment){
                         setPixelDeph(pix, piy, zFragment);
                         setPixelColor(pix, piy,  pColor);
+                        // setPixelColor(pix, piy,  glm::vec4(zFragment, zFragment, zFragment, 1.0f)); //Show Z-Buffer
                     }
                 }
             }

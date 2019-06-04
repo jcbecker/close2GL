@@ -24,7 +24,7 @@ public:
 
     RendererLayer(){
         this->znear = 1.0f;
-        this->zfar = 3000.0f;
+        this->zfar = 30.0f;
         this->choice = OPENGL;
     }
 

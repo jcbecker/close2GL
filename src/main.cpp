@@ -104,6 +104,7 @@ int main(){
     bool gouraudSpecular = true;
     glm::vec3 lightPosition = glm::vec3(2.0f, 2.0f, 2.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    bool perspecCorection = false;
 
     glm::vec3 nCowPosition = glm::vec3(0.0, 0.0, 0.0);
     glfwSetWindowUserPointer(window, &camera);
@@ -331,6 +332,8 @@ int main(){
             c2glr.lightColor = lightColor;
             c2glr.lightPosition = lightPosition;
             c2glr.gouraudSpecular = gouraudSpecular;
+            c2glr.perspecCorection = perspecCorection;
+            c2glr.projection = projection;
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
@@ -427,6 +430,11 @@ int main(){
                 }
                 ImGui::Unindent();
 
+                ImGui::BulletText("Perspective Corection");
+                ImGui::Indent();{
+                    ImGui::Checkbox("Perspective Corection Flag", &perspecCorection);
+                }
+                ImGui::Unindent();
 
                 ImGui::BulletText("Depth test");
                 ImGui::Indent();{
@@ -518,7 +526,7 @@ int main(){
             if (ImGui::CollapsingHeader("Projection")){
                 ImGui::Indent();{
                     ImGui::SliderFloat("Z near", &mRenderer.znear, 0.01f, mRenderer.zfar);
-                    ImGui::SliderFloat("Z far", &mRenderer.zfar, mRenderer.znear, 6000.0f);
+                    ImGui::SliderFloat("Z far", &mRenderer.zfar, mRenderer.znear, 60.0f);
                     ImGui::BulletText("FoV is in Camera section, as Zoom");
                 }
                 ImGui::Unindent();
