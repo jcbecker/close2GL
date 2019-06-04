@@ -107,6 +107,7 @@ int main(){
     glm::vec3 lightPosition = glm::vec3(2.0f, 2.0f, 2.0f);
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     bool perspecCorection = false;
+    bool useTexturesFlag = false;
 
     glm::vec3 nCowPosition = glm::vec3(0.0, 0.0, 0.0);
     glfwSetWindowUserPointer(window, &camera);
@@ -137,6 +138,19 @@ int main(){
     // Load Textures
     TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
     mandrilTexture.addres = GL_TEXTURE0;
+
+    if(mandrilTexture.channels == 3){
+        int iimax, iimin;
+        iimax = -1;
+        iimin = 256;
+        for(int i = 0; i < mandrilTexture.height * mandrilTexture.width * 3; i++){
+            int iaux = (int) mandrilTexture.data[i];
+            if(iaux > iimax) iimax = iaux;
+            if(iaux < iimin) iimin = iaux;
+            // std::cout << "color test: (" << (int) mandrilTexture.data[i] << ")\n";
+        }
+        std::cout << "Max: " << iimax << ", Min: " << iimin << "\n\n";
+    }
     
     mandrilTexture = genBindTexture(mandrilTexture);
 
@@ -276,7 +290,7 @@ int main(){
             loadObjectShader.setBool("useLight", useLight);
             loadObjectShader.setBool("isGouraud", isGouraud);
             loadObjectShader.setBool("gouraudSpecular", gouraudSpecular);
-
+            loadObjectShader.setBool("useTexturesFlag", useTexturesFlag);
 
             // bind textures on corresponding texture units
             glActiveTexture(mandrilTexture.addres);
@@ -412,6 +426,14 @@ int main(){
                 ImGui::Text("Objects color:");
                 ImGui::Indent();{
                     ImGui::ColorEdit3("objects color", (float*)&objImColors);
+                }
+                ImGui::Unindent();
+            }
+            if(ImGui::CollapsingHeader("Textures")){
+
+                ImGui::BulletText("Use Textures");
+                ImGui::Indent();{
+                    ImGui::Checkbox("Use Textures Flag", &useTexturesFlag);
                 }
                 ImGui::Unindent();
             }

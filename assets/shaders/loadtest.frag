@@ -15,11 +15,12 @@ uniform vec3 lightPos;
 uniform bool useLight;
 uniform bool isGouraud;
 uniform bool hasTexCoords;
+uniform bool useTexturesFlag;
 uniform sampler2D mandrilTexture;
 
 void main(){
     vec3 rawColor = uColor;
-    if(hasTexCoords){
+    if(hasTexCoords && useTexturesFlag){
         rawColor = vec3(texture(mandrilTexture, TexCoord));
     }
     if(useLight && !isGouraud){
