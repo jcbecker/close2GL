@@ -26,6 +26,13 @@ struct InRasterizerVertex {
     glm::vec3 OriginalPos;
 };
 
+struct TextureStruct{
+    unsigned char *data;
+    int width, height, channels;
+    unsigned int ID;
+    GLenum addres;
+};
+
 
 
 #endif

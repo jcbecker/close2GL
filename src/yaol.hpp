@@ -20,6 +20,7 @@ struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
     int colorIndex;
+    glm::vec2 TexCoords;
 };
 
 class RenderableObject{
@@ -33,6 +34,7 @@ public:
     std::vector<float> shine;
     std::vector<Vertex> vertices;
     glm::mat4 modelMatrix;
+    bool hasTexCoords;
 
     std::vector<glm::vec3> faceNormals;
 
@@ -90,31 +92,68 @@ public:
             // std::cout << "test: " << diffuse[i].x << ",  " << diffuse[i].y << ", " << diffuse[i].z << ":\n";
             // std::cout << "test: " << specular[i].x << ",  " << specular[i].y << ", " << specular[i].z << ":\n";
         }
+        char wwtest[256];
+        fscanf(fp, "Texture = %s\n", &(wwtest));
+        if(wwtest[0] == 'Y'){
+            this->hasTexCoords = true;
+            printf("Loading [%s] WITH texture!\n",objFilePath);
+        }else{
+            this->hasTexCoords = false;
+            printf("Loading [%s] WITHOUT texture!\n",objFilePath);
+        }
+
         fscanf(fp, "%c", &ch);
         while(ch!= '\n')  // skip documentation line
             fscanf(fp, "%c", &ch);
         
         for (unsigned int i=0; i<nTriangles; i++){
-            fscanf(fp, "v0 %f %f %f %f %f %f %d\n",
-            &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
-            &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
-            &(vfmf.colorIndex));
-            vertices.push_back(vfmf);
+            if(this->hasTexCoords){
+                fscanf(fp, "v0 %f %f %f %f %f %f %d %f %f\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex),
+                &(vfmf.TexCoords.x), &(vfmf.TexCoords.y));
+                vertices.push_back(vfmf);
+            }else{
+                fscanf(fp, "v0 %f %f %f %f %f %f %d\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex));
+                vertices.push_back(vfmf);
+            }
 
             // normals.push_back(bauxVec3);
             // colorIndexes.push_back(ifmf);
-            
-            fscanf(fp, "v1 %f %f %f %f %f %f %d\n",
-            &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
-            &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
-            &(vfmf.colorIndex));
-            vertices.push_back(vfmf);
-            
-            fscanf(fp, "v2 %f %f %f %f %f %f %d\n",
-            &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
-            &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
-            &(vfmf.colorIndex));
-            vertices.push_back(vfmf);
+            if(this->hasTexCoords){
+                fscanf(fp, "v1 %f %f %f %f %f %f %d %f %f\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex),
+                &(vfmf.TexCoords.x), &(vfmf.TexCoords.y));
+                vertices.push_back(vfmf);
+            }else{
+                fscanf(fp, "v1 %f %f %f %f %f %f %d\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex));
+                vertices.push_back(vfmf);
+            }
+
+
+            if(this->hasTexCoords){
+                fscanf(fp, "v2 %f %f %f %f %f %f %d %f %f\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex),
+                &(vfmf.TexCoords.x), &(vfmf.TexCoords.y));
+                vertices.push_back(vfmf);
+            }else{
+                fscanf(fp, "v2 %f %f %f %f %f %f %d\n",
+                &(vfmf.Position.x), &(vfmf.Position.y), &(vfmf.Position.z),
+                &(vfmf.Normal.x), &(vfmf.Normal.y), &(vfmf.Normal.z),
+                &(vfmf.colorIndex));
+                vertices.push_back(vfmf);
+            }
             
             fscanf(fp, "face normal %f %f %f\n",
             &(auxVec3.x), &(auxVec3.y), &(auxVec3.z));
@@ -178,6 +217,12 @@ public:
         // Normal attribute
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         glEnableVertexAttribArray(1);
+
+        if(this->hasTexCoords){
+            // Texture Coordenates
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+            glEnableVertexAttribArray(2);
+        }
 
         glBindVertexArray(0);
         // std::cout << "Bigger size Offset: " << getMaxOffsetsize() << "\n";

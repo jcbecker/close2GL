@@ -29,6 +29,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processHoldingKeyInput(GLFWwindow *window);
 static void errorCallback(int error, const char* description);
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+TextureStruct loadTextureFile(const char* path);
+TextureStruct genBindTexture(TextureStruct st);
 
 // Global variables, Note is experimental version of cgpg, later this gonna change
 const unsigned int SCR_WIDTH = 104 * 16;
@@ -129,7 +131,18 @@ int main(){
 
     auto font_default = io.Fonts->AddFontDefault();
 
-    RenderableObject cubeojb("../assets/models/cube.in");
+
+    // Invert texture load y orientation
+    stbi_set_flip_vertically_on_load(true);
+    // Load Textures
+    TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
+    mandrilTexture.addres = GL_TEXTURE0;
+    
+    mandrilTexture = genBindTexture(mandrilTexture);
+
+
+    // Load objects(meshes) file
+    RenderableObject cubeojb("../assets/models/cube_text.in");
     RenderableObject gisele("../assets/models/cow_up.in");
 
 
@@ -137,6 +150,12 @@ int main(){
     Shader loadObjectShader("../assets/shaders/loadtest.vert", "../assets/shaders/loadtest.frag");
     Shader close2GLShader("../assets/shaders/close2gl.vert", "../assets/shaders/close2gl.frag");
     Shader c2GLRShader("../assets/shaders/c2glr.vert", "../assets/shaders/c2glr.frag");
+
+
+    // Bind textures addres to Shader uniform
+    loadObjectShader.use(); // don't forget to activate/use the shader before setting uniforms!
+    loadObjectShader.setInt("mandrilTexture",  mandrilTexture.addres);
+
 
     bool drawCubeFlag = true;
     bool drawCowGiseleFlag = true;
@@ -257,10 +276,16 @@ int main(){
             loadObjectShader.setBool("useLight", useLight);
             loadObjectShader.setBool("isGouraud", isGouraud);
             loadObjectShader.setBool("gouraudSpecular", gouraudSpecular);
+
+
+            // bind textures on corresponding texture units
+            glActiveTexture(mandrilTexture.addres);
+            glBindTexture(GL_TEXTURE_2D, mandrilTexture.ID);
             
             
 
             if(drawCubeFlag){
+                loadObjectShader.setBool("hasTexCoords", cubeojb.hasTexCoords);
                 loadObjectShader.setMat4("model", cubeojb.modelMatrix);
                 mvp = projection * view * cubeojb.modelMatrix;
                 loadObjectShader.setMat4("mvp", mvp);
@@ -270,6 +295,7 @@ int main(){
 
 
             if(drawCowGiseleFlag){
+                loadObjectShader.setBool("hasTexCoords", gisele.hasTexCoords);
                 loadObjectShader.setVec3("uColor" , glm::vec3(1.0f, 0.0f, 0.0f));
                 loadObjectShader.setMat4("model", glm::translate(gisele.modelMatrix, nCowPosition * 100.0f));
                 mvp = projection * view * glm::translate(gisele.modelMatrix, nCowPosition * 100.0f);
@@ -675,4 +701,44 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
         }
     }
     
+}
+
+TextureStruct loadTextureFile(const char* path){
+    TextureStruct st;
+    // int width, height, nrChannels;
+    st.data = stbi_load(path, &st.width, &st.height, &st.channels, 0);
+    if (st.data){
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, st.width, st.height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        // glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "Texture loaded,  (width, height, channels): (" 
+        << st.width << ", " << st.height << ", " << st.channels << ")\n\n";
+    }
+    else{
+        std::cout << "Failed to load in " << path << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    return st;
+}
+
+TextureStruct genBindTexture(TextureStruct st){
+    //to-do selectables Filter options
+    glGenTextures(1, &st.ID);
+    glBindTexture(GL_TEXTURE_2D, st.ID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // stbi_set_flip_vertically_on_load(true);
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    if (st.data){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, st.width, st.height, 0, GL_RGB, GL_UNSIGNED_BYTE, st.data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    return st;
 }
