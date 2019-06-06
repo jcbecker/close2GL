@@ -176,7 +176,7 @@ int main(){
     glm::vec4 objImColors = glm::vec4(0.7f, 0.7f, 0.7f, 1.0f);
     glm::vec4 clear_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.00f); //Clear color
 
-    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader, cscr_w, cscr_h, clear_color, objImColors);
+    C2GL::Close2GlRender c2glr = C2GL::Close2GlRender(c2GLRShader, cscr_w, cscr_h, clear_color, objImColors, mandrilTexture);
 
     bool showMainMenu = true;
 
@@ -374,12 +374,13 @@ int main(){
             c2glr.gouraudSpecular = gouraudSpecular;
             c2glr.perspecCorection = perspecCorection;
             c2glr.projection = projection;
+            c2glr.useTexturesFlag = useTexturesFlag;
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
                 cubeojb.updateClose2GLVertices(mvp, viewPortMatrix, cubeojb.modelClose2GL, view);
                 c2glr.model = cubeojb.modelClose2GL;
-                c2glr.rasterize(cubeojb.C2GLRasVert);
+                c2glr.rasterize(cubeojb.C2GLRasVert, cubeojb.hasTexCoords);
 
             }
             
@@ -390,7 +391,7 @@ int main(){
                 gisele.updateClose2GLVertices(mvp, viewPortMatrix, glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f), view);
                 // c2glr.model = gisele.modelClose2GL; To-Do: Use this line
                 c2glr.model = glm::translate(gisele.modelClose2GL, nCowPosition * 100.0f);
-                c2glr.rasterize(gisele.C2GLRasVert);
+                c2glr.rasterize(gisele.C2GLRasVert, gisele.hasTexCoords);
 
             }
             

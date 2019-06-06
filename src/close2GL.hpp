@@ -86,6 +86,8 @@ namespace C2GL{
         GLuint faceCulling;
         GLuint orientationMode;
         bool backFaceCullingFlag;
+        bool useTexturesFlag;
+        bool hasTextureFlag;
         
         std::vector<Close2GLVertex> giseleVertices;
         std::vector<Close2GLVertex> cubeVertices;
@@ -101,6 +103,8 @@ namespace C2GL{
         std::vector<RasterizerVertex> verticeStack;
 
         bool perspecCorection;
+
+        TextureStruct textureImg;
 
         // uniform vec3 lightPos;
         glm::vec3 lightPosition; // Light position in CCS
@@ -127,8 +131,9 @@ namespace C2GL{
         glm::mat4 projection;
 
 
-        Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor) : m_Shader(p_Shader){
+        Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor, TextureStruct i_texture) : m_Shader(p_Shader){
             rasterizePrimitive = GL_FILL;
+            this->textureImg = i_texture;
 
             Close2GLRenderPanelVertex aav;
             aav.Position = glm::vec2(-1.0f, -1.0f);
@@ -190,6 +195,25 @@ namespace C2GL{
             
 
             generateClose2GLVAOVBO();
+        }
+
+
+        // Recive a float s, t both in {0.0, 1.0} and return a color of texture
+        // in coordinates of this s, t proportion
+        glm::vec4 getTextureProportion(float s, float t){
+            s = glm::clamp(s, 0.0f, 1.0f);
+            t = glm::clamp(t, 0.0f, 1.0f);
+            if(s < 0.0f || s > 1.0f || t < 0.0f || t > 1.0f){
+                std::cout << "Warning: (s, t) values out of range  (" << s << ", " << t<< ")\n\n";
+                return glm::vec4(0.5f, 0.5f, 1.0f, 1.0f);
+            }
+            int w = textureImg.width * s;
+            int h = textureImg.height * t;
+            unsigned char r = textureImg.data[(w + h * textureImg.width) * textureImg.channels];
+            unsigned char g = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 1];
+            unsigned char b = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 2];
+
+            return glm::vec4( (float)r / 256, (float)g / 256, (float)b / 256, 1.0f);
         }
 
         void line(RasterizerVertex v0, RasterizerVertex v1){
@@ -319,6 +343,10 @@ namespace C2GL{
             v1.OriginalPos = verticeStack[1].OriginalPos;
             v2.OriginalPos = verticeStack[2].OriginalPos;
 
+            v0.TexCoords = verticeStack[0].TexCoords;
+            v1.TexCoords = verticeStack[1].TexCoords;
+            v2.TexCoords = verticeStack[2].TexCoords;
+
             v0.Color = this->mObjectColor;
             v1.Color = this->mObjectColor;
             v2.Color = this->mObjectColor;
@@ -409,9 +437,17 @@ namespace C2GL{
                     Wv1 = Wv1/dem;
 
                     Wv2 = 1 - Wv0 - Wv1;
-
+                    
                     glm::vec4 pColor;
-                    pColor = v0.Color * Wv0 + v1.Color * Wv1 + v2.Color * Wv2;
+
+                    if(useTexturesFlag && hasTextureFlag){
+                        float ns = v0.TexCoords.s * Wv0 + v1.TexCoords.s * Wv1 + v2.TexCoords.s * Wv2;
+                        float nt = v0.TexCoords.t * Wv0 + v1.TexCoords.t * Wv1 + v2.TexCoords.t * Wv2;
+                        pColor = getTextureProportion(ns, nt);
+                    }else{
+                        pColor = v0.Color * Wv0 + v1.Color * Wv1 + v2.Color * Wv2;
+
+                    }
 
                     if(getPixelDeph(pix, piy) > zFragment){
                         setPixelDeph(pix, piy, zFragment);
@@ -553,7 +589,8 @@ namespace C2GL{
             glGenerateMipmap(GL_TEXTURE_2D);
         }
 
-        void rasterize(std::vector<RasterizerVertex> vertices){
+        void rasterize(std::vector<RasterizerVertex> vertices, bool i_hasTextureFlag){
+            this->hasTextureFlag = i_hasTextureFlag;
             unsigned int vs = vertices.size();
             RasterizerVertex aav;
             for(int i = 0; i <  vs; i++){
