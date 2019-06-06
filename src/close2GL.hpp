@@ -464,10 +464,7 @@ namespace C2GL{
 
             verticeStack = std::vector<RasterizerVertex>();
 
-            glBindTexture(GL_TEXTURE_2D, this->textureUniform);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
-
+            updateTextureInGPU();
         }
 
         void updateObjectColor(glm::vec4 i_oc){
@@ -477,7 +474,7 @@ namespace C2GL{
         void clearTextureColor(){
             for (int i = 0; i < this->scrH; i++) {
                 for (int j = 0; j < this->scrW; j++) {
-                    setPixelColor(j, i, mClearColor);
+                    setPixelColor(j, i, this->mClearColor);
                 }
             }
             verticeStack = std::vector<RasterizerVertex>();
@@ -549,8 +546,11 @@ namespace C2GL{
         }
 
         void updateTextureInGPU(){
+            glGenTextures(1, &this->textureUniform);
             glBindTexture(GL_TEXTURE_2D, this->textureUniform);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->scrW, this->scrH, GL_RGBA, GL_FLOAT, this->mColorBuffer.data());
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->scrW, this->scrH, 0, GL_RGBA,  GL_FLOAT, this->mColorBuffer.data());
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
 
         void rasterize(std::vector<RasterizerVertex> vertices){
@@ -563,9 +563,6 @@ namespace C2GL{
 
         }
 
-        // void setShader(Shader * p_shader){
-        //     this->m_Shader = Shader(p_shader);
-        // }
 
         void draw(){
             glActiveTexture(GL_TEXTURE0);
