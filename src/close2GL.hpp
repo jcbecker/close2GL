@@ -449,6 +449,8 @@ namespace C2GL{
 
                     }
 
+                    // std::cout << "Debug: zFragment and zWheight" << zFragment << " and " << v0.Position.z * Wv0 + v1.Position.z * Wv1 + v2.Position.z * Wv2 << ":\n\n";
+                    zFragment = v0.Position.z * Wv0 + v1.Position.z * Wv1 + v2.Position.z * Wv2;
                     if(getPixelDeph(pix, piy) > zFragment){
                         setPixelDeph(pix, piy, zFragment);
                         setPixelColor(pix, piy,  pColor);

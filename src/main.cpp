@@ -136,7 +136,7 @@ int main(){
     // Invert texture load y orientation
     stbi_set_flip_vertically_on_load(true);
     // Load Textures
-    TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
+    TextureStruct mandrilTexture = loadTextureFile("../assets/textures/checker_8x8.jpg");
     mandrilTexture.addres = GL_TEXTURE0;
 
     if(mandrilTexture.channels == 3){
@@ -751,8 +751,8 @@ TextureStruct genBindTexture(TextureStruct st){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
     // stbi_set_flip_vertically_on_load(true);
     // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
