@@ -137,20 +137,9 @@ int main(){
     stbi_set_flip_vertically_on_load(true);
     // Load Textures
     TextureStruct mandrilTexture = loadTextureFile("../assets/textures/checker_8x8.jpg");
-    mandrilTexture.addres = GL_TEXTURE0;
+    // TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
 
-    if(mandrilTexture.channels == 3){
-        int iimax, iimin;
-        iimax = -1;
-        iimin = 256;
-        for(int i = 0; i < mandrilTexture.height * mandrilTexture.width * 3; i++){
-            int iaux = (int) mandrilTexture.data[i];
-            if(iaux > iimax) iimax = iaux;
-            if(iaux < iimin) iimin = iaux;
-            // std::cout << "color test: (" << (int) mandrilTexture.data[i] << ")\n";
-        }
-        std::cout << "Max: " << iimax << ", Min: " << iimin << "\n\n";
-    }
+    mandrilTexture.addres = GL_TEXTURE0;
     
     mandrilTexture = genBindTexture(mandrilTexture);
 

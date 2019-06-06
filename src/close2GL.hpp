@@ -368,17 +368,15 @@ namespace C2GL{
             v2 = vertexShading(v2);
 
             //Debug Begin
-            // v0.Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            // v1.Color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-            // v2.Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
             if(this->perspecCorection){
-                glm::vec4 PosFixTest = this->projection * this->view  * this->model * glm::vec4(v0.OriginalPos, 1.0f);
-                std::cout << "Start Debug:\n";
-                std::cout << "ScreenPos: (" << v0.Position.x << ", " <<  v0.Position.y << ", " <<  v0.Position.z << ", " <<  v0.Position.w << ")\n";
-                std::cout << "Clip: (" << PosFixTest.x << ", " <<  PosFixTest.y << ", " <<  PosFixTest.z << ", " <<  PosFixTest.w << ")\n";
-                // std::cout << "View: (" << v0.OriginalPos.x << ", " <<  v0.OriginalPos.y << ", " <<  v0.OriginalPos.z << ")\n";
-                std::cout << "End Debug:\n\n";
-
+                glm::mat4 nmvp = this->projection * this->view * this->model;
+                // std::cout << "v0.Position ( " << v0.Position.x << ", " << v0.Position.y << ", " << v0.Position.z << ", " << v0.Position.w << ")\n";
+                // std::cout << "v0.OriginalPos ( " << v0.OriginalPos.x << ", " << v0.OriginalPos.y << ", " << v0.OriginalPos.z << ")\n";
+                // glm::vec4 nnPos = nmvp * glm::vec4(v0.OriginalPos, 1.0f);
+                // std::cout << "nnPos ( " << nnPos.x << ", " << nnPos.y << ", " << nnPos.z << ", " << nnPos.w << ")\n\n\n";
+                v0.w = (nmvp * glm::vec4(v0.OriginalPos, 1.0f)).w;
+                v1.w = (nmvp * glm::vec4(v1.OriginalPos, 1.0f)).w;
+                v2.w = (nmvp * glm::vec4(v2.OriginalPos, 1.0f)).w;
             }
             //Debug End
             
@@ -443,6 +441,13 @@ namespace C2GL{
                     if(useTexturesFlag && hasTextureFlag){
                         float ns = v0.TexCoords.s * Wv0 + v1.TexCoords.s * Wv1 + v2.TexCoords.s * Wv2;
                         float nt = v0.TexCoords.t * Wv0 + v1.TexCoords.t * Wv1 + v2.TexCoords.t * Wv2;
+                        // Debug begin
+                        if(this->perspecCorection){
+                            float nnw = v0.w * Wv0 + v1.w * Wv1 + v2.w * Wv2;
+                            ns *= 1/nnw;
+                            nt *= 1/nnw;
+                        }
+                        // Debug end
                         pColor = getTextureProportion(ns, nt);
                     }else{
                         pColor = v0.Color * Wv0 + v1.Color * Wv1 + v2.Color * Wv2;
