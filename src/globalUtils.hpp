@@ -17,6 +17,7 @@ struct RasterizerVertex {
     glm::vec4 Position;
     glm::vec3 Normal;
     glm::vec3 OriginalPos;
+    glm::vec2 TexCoords;
 };
 
 struct InRasterizerVertex {
@@ -24,6 +25,7 @@ struct InRasterizerVertex {
     glm::vec3 Normal;
     glm::vec4 Color;
     glm::vec3 OriginalPos;
+    glm::vec2 TexCoords;
 };
 
 struct TextureStruct{

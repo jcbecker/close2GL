@@ -225,10 +225,6 @@ public:
         }
 
         glBindVertexArray(0);
-        // std::cout << "Bigger size Offset: " << getMaxOffsetsize() << "\n";
-        
-        // std::cout << "Center of Mesh: (" << getCenterBBoxOCS().x << ", " << getCenterBBoxOCS().y << ", " << getCenterBBoxOCS().z << ")\n";
-
     }
 
     void generateClose2GLVAOVBO(){
@@ -266,13 +262,6 @@ public:
         unsigned int vss = this->vertices.size();
         C2GLRasVert.reserve(vss); // Use reserve, maybe can save some fps in close2gl
         
-        //debug1
-        // if(vss%3){
-        //     std::cout << "debug1: " << vss << ": não divisível.\n";
-        // }else{
-        //     std::cout << "debug1: " << vss << ": Divisível.\n";
-        // }
-        
         if(vss%3){
             std::cout << "Erro, vertex to rasterize dont represent a mesh of triangles!\n\n";
             exit(EXIT_FAILURE);
@@ -283,13 +272,17 @@ public:
             v1.Position = glm::vec4(vertices[yai + 1].Position, 1.0f);
             v2.Position = glm::vec4(vertices[yai + 2].Position, 1.0f);
 
-            v0.OriginalPos = glm::vec4(vertices[yai].Position, 1.0f);
-            v1.OriginalPos = glm::vec4(vertices[yai + 1].Position, 1.0f);
-            v2.OriginalPos = glm::vec4(vertices[yai + 2].Position, 1.0f);
+            v0.OriginalPos = vertices[yai].Position;
+            v1.OriginalPos = vertices[yai + 1].Position;
+            v2.OriginalPos = vertices[yai + 2].Position;
             
-            v0.Normal = glm::vec4(vertices[yai].Normal, 1.0f);
-            v1.Normal = glm::vec4(vertices[yai + 1].Normal, 1.0f);
-            v2.Normal = glm::vec4(vertices[yai + 2].Normal, 1.0f);
+            v0.Normal = vertices[yai].Normal;
+            v1.Normal = vertices[yai + 1].Normal;
+            v2.Normal = vertices[yai + 2].Normal;
+
+            v0.TexCoords = vertices[yai].TexCoords;
+            v1.TexCoords = vertices[yai + 1].TexCoords;
+            v2.TexCoords = vertices[yai + 2].TexCoords;
 
             v0.Position = mvp * v0.Position;
             v1.Position = mvp * v1.Position;
@@ -319,13 +312,6 @@ public:
                 }
             }
         }
-
-        //debug2
-        // if(C2GLRasVert.size()%3){
-        //     std::cout << "debug2: " << C2GLRasVert.size() << ": não divisível.\n";
-        // }else{
-        //     std::cout << "debug2: " << C2GLRasVert.size() << ": Divisível.\n";
-        // }
 
         if(C2GLRasVert.size()%3){
             std::cout << "Erro, vertex to rasterize dont represent a mesh of triangles!\n\n";
