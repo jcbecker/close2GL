@@ -203,12 +203,13 @@ namespace C2GL{
         glm::vec4 getTextureProportion(float s, float t){
             s = glm::clamp(s, 0.0f, 1.0f);
             t = glm::clamp(t, 0.0f, 1.0f);
-            if(s < 0.0f || s > 1.0f || t < 0.0f || t > 1.0f){
-                std::cout << "Warning: (s, t) values out of range  (" << s << ", " << t<< ")\n\n";
-                return glm::vec4(0.5f, 0.5f, 1.0f, 1.0f);
-            }
-            int w = textureImg.width * s;
-            int h = textureImg.height * t;
+            
+            int w = (textureImg.width -1) * s;
+            int h = (textureImg.height -1) * t;
+            if(w >= textureImg.width) w = textureImg.width -1;
+            if(w < 0) w = 0;
+            if(h >= textureImg.height) h = textureImg.height -1;
+            if(h < 0) h = 0;
             unsigned char r = textureImg.data[(w + h * textureImg.width) * textureImg.channels];
             unsigned char g = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 1];
             unsigned char b = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 2];
