@@ -31,6 +31,7 @@ static void errorCallback(int error, const char* description);
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 TextureStruct loadTextureFile(const char* path);
 TextureStruct genBindTexture(TextureStruct st);
+TextureStruct refreshTexture(TextureStruct st, GLenum f);
 
 // Global variables, Note is experimental version of cgpg, later this gonna change
 const unsigned int SCR_WIDTH = 104 * 16;
@@ -108,6 +109,7 @@ int main(){
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     bool perspecCorection = false;
     bool useTexturesFlag = false;
+    TextureFiltering filteringOfChoice = NEARESTNEIGHBOR;
 
     glm::vec3 nCowPosition = glm::vec3(0.0, 0.0, 0.0);
     glfwSetWindowUserPointer(window, &camera);
@@ -424,6 +426,23 @@ int main(){
                 ImGui::BulletText("Use Textures");
                 ImGui::Indent();{
                     ImGui::Checkbox("Use Textures Flag", &useTexturesFlag);
+                }
+                ImGui::Unindent();
+
+                ImGui::BulletText("Texture Filtering");
+                ImGui::Indent();{
+                    if (ImGui::RadioButton("NEARESTNEIGHBOR", filteringOfChoice == NEARESTNEIGHBOR)) {
+                        filteringOfChoice = NEARESTNEIGHBOR;
+                        mandrilTexture = refreshTexture(mandrilTexture, GL_NEAREST);
+                    }
+                    if (ImGui::RadioButton("BILINEAR", filteringOfChoice == BILINEAR)) {
+                        filteringOfChoice = BILINEAR;
+                        mandrilTexture = refreshTexture(mandrilTexture, GL_LINEAR);
+                    }
+                    if (ImGui::RadioButton("TRILINEAR", filteringOfChoice == TRILINEAR)) {
+                        filteringOfChoice = TRILINEAR;
+                        mandrilTexture = refreshTexture(mandrilTexture, GL_LINEAR_MIPMAP_LINEAR);
+                    }
                 }
                 ImGui::Unindent();
             }
@@ -753,4 +772,28 @@ TextureStruct genBindTexture(TextureStruct st){
         std::cout << "Failed to load texture" << std::endl;
     }
     return st;
+}
+
+TextureStruct refreshTexture(TextureStruct st, GLenum f){
+    //to-do selectables Filter options
+    glGenTextures(1, &st.ID);
+    glBindTexture(GL_TEXTURE_2D, st.ID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
+    
+    // stbi_set_flip_vertically_on_load(true);
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    if (st.data){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, st.width, st.height, 0, GL_RGB, GL_UNSIGNED_BYTE, st.data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    return st;
+
 }

@@ -36,6 +36,12 @@ struct TextureStruct{
     GLenum addres;
 };
 
+enum TextureFiltering {
+    NEARESTNEIGHBOR,
+    BILINEAR,
+    TRILINEAR
+};
+
 
 
 #endif
