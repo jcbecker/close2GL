@@ -327,6 +327,27 @@ namespace C2GL{
             return v;
         }
 
+        float bardem(glm::vec2 v0, glm::vec2 v1, glm::vec2 v2){
+            return (v1.y - v2.y) * (v0.x - v2.x) + (v2.x - v1.x) * (v0.y - v2.y);
+        }
+
+        glm::vec3 barWeights(glm::vec2 v0, glm::vec2 v1, glm::vec2 v2, glm::vec2 p, float dem){
+            glm::vec3 r = glm::vec3(-1.0f, -1.0f, -1.0f);
+
+            r.x = (v1.y - v2.y) * (p.x - v2.x) + (v2.x - v1.x) * (p.y - v2.y);
+            r.x = r.x / dem;
+
+            r.y = (v2.y - v0.y) * (p.x - v2.x) + (v0.x - v2.x) * (p.y - v2.y);
+            r.y = r.y/dem;
+
+            r.z = 1 - r.x - r.y;
+
+            return r;
+        }
+
+
+
+
         void rasterizeTriangle(){
             // Sorting vertices by height
             InRasterizerVertex v0, v1, v2;
@@ -367,18 +388,12 @@ namespace C2GL{
             v1 = vertexShading(v1);
             v2 = vertexShading(v2);
 
-            //Debug Begin
             if(this->perspecCorection){
                 glm::mat4 nmvp = this->projection * this->view * this->model;
-                // std::cout << "v0.Position ( " << v0.Position.x << ", " << v0.Position.y << ", " << v0.Position.z << ", " << v0.Position.w << ")\n";
-                // std::cout << "v0.OriginalPos ( " << v0.OriginalPos.x << ", " << v0.OriginalPos.y << ", " << v0.OriginalPos.z << ")\n";
-                // glm::vec4 nnPos = nmvp * glm::vec4(v0.OriginalPos, 1.0f);
-                // std::cout << "nnPos ( " << nnPos.x << ", " << nnPos.y << ", " << nnPos.z << ", " << nnPos.w << ")\n\n\n";
                 v0.w = (nmvp * glm::vec4(v0.OriginalPos, 1.0f)).w;
                 v1.w = (nmvp * glm::vec4(v1.OriginalPos, 1.0f)).w;
                 v2.w = (nmvp * glm::vec4(v2.OriginalPos, 1.0f)).w;
             }
-            //Debug End
             
 
             if (v0.Position.y > v1.Position.y) std::swap(v0, v1);
@@ -404,58 +419,51 @@ namespace C2GL{
                 glm::vec4 B = second_half ? v1.Position + (v2.Position - v1.Position)*beta : v0.Position + (v1.Position-v0.Position)*beta;
                 
                 if (A.x > B.x) std::swap(A, B);
+
+                float Px, Py;
+                glm::vec3 wp;
+                float dem;
+
+                dem = bardem(v0.Position, v1.Position, v2.Position);
+
                 for (int j=A.x; j<=B.x; j++) {
                     float aprop = (float) (B.x - j) / (float) (B.x - A.x);
                     float zFragment = glm::mix(B.z, A.z, aprop);
                     int pix, piy;
                     pix = j;
                     piy = v0.Position.y+i;
-
-                    // To-do: remove from for some of the lines below
-                    float Px, Py, Yv0, Yv1, Yv2, Xv0, Xv1, Xv2, Wv0, Wv1, Wv2;
+                    
                     Px = (float) pix;
                     Py = (float) piy;
 
-                    Xv0 = (float) v0.Position.x;
-                    Yv0 = (float) v0.Position.y;
-
-                    Xv1 = (float) v1.Position.x;
-                    Yv1 = (float) v1.Position.y;
-
-                    Xv2 = (float) v2.Position.x;
-                    Yv2 = (float) v2.Position.y;
-
-                    float dem;
-                    dem = (Yv1 - Yv2) * (Xv0 - Xv2) + (Xv2 - Xv1) * (Yv0 - Yv2);
-
-                    Wv0 = (Yv1 - Yv2) * (Px - Xv2) + (Xv2 - Xv1) * (Py - Yv2);
-                    Wv0 = Wv0 / dem;
-
-                    Wv1 = (Yv2 - Yv0) * (Px - Xv2) + (Xv0 - Xv2) * (Py - Yv2);
-                    Wv1 = Wv1/dem;
-
-                    Wv2 = 1 - Wv0 - Wv1;
+                    wp = barWeights(v0.Position, v1.Position, v2.Position, glm::vec2(Px, Py), dem);
+                    zFragment = v0.Position.z * wp.x + v1.Position.z * wp.y + v2.Position.z * wp.z;
+                    
                     
                     glm::vec4 pColor;
 
+                    // Debug begin
+
+                    float ns;
+                    float nt;
+                    if(this->perspecCorection){
+                        wp = glm::vec3(wp.x / v0.w, wp.y / v1.w, wp.z / v2.w);
+				        wp = wp / (wp.x + wp.y + wp.z);
+                    }
+                    // Debug end
+
                     if(useTexturesFlag && hasTextureFlag){
-                        float ns = v0.TexCoords.s * Wv0 + v1.TexCoords.s * Wv1 + v2.TexCoords.s * Wv2;
-                        float nt = v0.TexCoords.t * Wv0 + v1.TexCoords.t * Wv1 + v2.TexCoords.t * Wv2;
-                        // Debug begin
-                        if(this->perspecCorection){
-                            float nnw = v0.w * Wv0 + v1.w * Wv1 + v2.w * Wv2;
-                            ns *= 1/nnw;
-                            nt *= 1/nnw;
-                        }
-                        // Debug end
+                        ns = v0.TexCoords.s * wp.x + v1.TexCoords.s * wp.y + v2.TexCoords.s * wp.z;
+                        nt = v0.TexCoords.t * wp.x + v1.TexCoords.t * wp.y + v2.TexCoords.t * wp.z;
+                        
                         pColor = getTextureProportion(ns, nt);
                     }else{
-                        pColor = v0.Color * Wv0 + v1.Color * Wv1 + v2.Color * Wv2;
+                        pColor = v0.Color * wp.x + v1.Color * wp.y + v2.Color * wp.z;
 
                     }
 
-                    // std::cout << "Debug: zFragment and zWheight" << zFragment << " and " << v0.Position.z * Wv0 + v1.Position.z * Wv1 + v2.Position.z * Wv2 << ":\n\n";
-                    zFragment = v0.Position.z * Wv0 + v1.Position.z * Wv1 + v2.Position.z * Wv2;
+                    // std::cout << "Debug: zFragment and zWheight" << zFragment << " and " << v0.Position.z * wp.x + v1.Position.z * wp.y + v2.Position.z * wp.z << ":\n\n";
+                    
                     if(getPixelDeph(pix, piy) > zFragment){
                         setPixelDeph(pix, piy, zFragment);
                         setPixelColor(pix, piy,  pColor);
