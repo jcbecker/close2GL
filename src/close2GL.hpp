@@ -88,6 +88,7 @@ namespace C2GL{
         bool backFaceCullingFlag;
         bool useTexturesFlag;
         bool hasTextureFlag;
+        TextureFiltering filteringOfChoice;
         
         std::vector<Close2GLVertex> giseleVertices;
         std::vector<Close2GLVertex> cubeVertices;
@@ -198,23 +199,56 @@ namespace C2GL{
         }
 
 
-        // Recive a float s, t both in {0.0, 1.0} and return a color of texture
-        // in coordinates of this s, t proportion
-        glm::vec4 getTextureProportion(float s, float t){
-            s = glm::clamp(s, 0.0f, 1.0f);
-            t = glm::clamp(t, 0.0f, 1.0f);
-            
-            int w = (textureImg.width -1) * s;
-            int h = (textureImg.height -1) * t;
+
+        glm::vec4 getTextureColor(int w, int h){
+            // Make clamp to guarantee value in range 0 to w or h
             if(w >= textureImg.width) w = textureImg.width -1;
             if(w < 0) w = 0;
             if(h >= textureImg.height) h = textureImg.height -1;
             if(h < 0) h = 0;
+
             unsigned char r = textureImg.data[(w + h * textureImg.width) * textureImg.channels];
             unsigned char g = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 1];
             unsigned char b = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 2];
 
             return glm::vec4( (float)r / 256, (float)g / 256, (float)b / 256, 1.0f);
+        }
+
+        // Recive a float s, t both in {0.0, 1.0} and return a color of texture
+        // in coordinates of this s, t proportion
+        glm::vec4 getTextureProportion(float s, float t){
+            s = glm::clamp(s, 0.0f, 1.0f);
+            t = glm::clamp(t, 0.0f, 1.0f);
+
+            int w;
+            int h;
+            
+            if (filteringOfChoice == NEARESTNEIGHBOR){
+                w = (textureImg.width -1) * s;
+                h = (textureImg.height -1) * t;
+                return getTextureColor(w, h);
+            }else if(filteringOfChoice == BILINEAR){
+                float ms, mt, deltaS, deltaT;
+                ms = (textureImg.width -1) * s;
+                mt = (textureImg.height -1) * t;
+                w = ms;
+                h = mt;
+                deltaS = ms - (float) w;
+                deltaT = mt - (float) h;
+                glm::vec4 aColor = getTextureColor(w, h);
+                glm::vec4 bColor = getTextureColor(w + 1, h);
+                glm::vec4 cColor = getTextureColor(w, h + 1);
+                glm::vec4 dColor = getTextureColor(w + 1, h + 1);
+
+                glm::vec4 v1Color = glm::mix(aColor, bColor, deltaS);
+                glm::vec4 v2Color = glm::mix(cColor, dColor, deltaS);
+                glm::vec4 v3Color = glm::mix(v1Color, v2Color, deltaT);
+                return v3Color;
+            }else{
+                w = (textureImg.width -1) * s;
+                h = (textureImg.height -1) * t;
+                return getTextureColor(w, h);
+            }
         }
 
         void line(RasterizerVertex v0, RasterizerVertex v1){

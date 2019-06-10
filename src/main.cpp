@@ -366,6 +366,7 @@ int main(){
             c2glr.perspecCorection = perspecCorection;
             c2glr.projection = projection;
             c2glr.useTexturesFlag = useTexturesFlag;
+            c2glr.filteringOfChoice = filteringOfChoice;
 
             if(drawCubeFlag){
                 mvp = projection * view * cubeojb.modelClose2GL;
