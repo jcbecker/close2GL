@@ -34,12 +34,19 @@ struct TextureStruct{
     int width, height, channels;
     unsigned int ID;
     GLenum addres;
+    int mmLevel;
 };
 
 enum TextureFiltering {
     NEARESTNEIGHBOR,
     BILINEAR,
     TRILINEAR
+};
+
+struct Mipmaps{
+    int levels;
+    int lastLevelWidth;
+    std::vector<TextureStruct> mmt;
 };
 
 

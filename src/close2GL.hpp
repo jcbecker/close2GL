@@ -131,10 +131,14 @@ namespace C2GL{
         // uniform mat4 projection;
         glm::mat4 projection;
 
+        Mipmaps tmmp;
+
 
         Close2GlRender(Shader p_Shader, int i_scrW, int i_scrH, glm::vec4 i_clearColor, glm::vec4 i_objectColor, TextureStruct i_texture) : m_Shader(p_Shader){
             rasterizePrimitive = GL_FILL;
             this->textureImg = i_texture;
+            this->textureImg.mmLevel = 0;
+            generateMipamaps();
 
             Close2GLRenderPanelVertex aav;
             aav.Position = glm::vec2(-1.0f, -1.0f);
@@ -197,6 +201,76 @@ namespace C2GL{
 
             generateClose2GLVAOVBO();
         }
+        bool isPow2(int a){
+            for(int i = 1; i <= a; i *= 2){
+                if (i == a) return true;
+            }
+            return false;
+        }
+
+        TextureStruct newMipmapLevel(TextureStruct a){
+            unsigned char * ndata;
+            ndata = new unsigned char [((a.width * a.height)/4) * a.channels];
+            if (ndata == nullptr) {
+                std::cout << "Error: Failed to allocate memory for texture\n\n";
+                exit(EXIT_FAILURE);
+            }
+
+            for (int i = 0; i < a.width - 1; i+=2){
+                for (int j = 0; j < a.height - 1; j+=2){
+                    glm::vec4 iColor;
+                    iColor = getTextureColor(a, i, j) / 4.0f;
+                    iColor += getTextureColor(a, i, j + 1) / 4.0f;
+                    iColor += getTextureColor(a, i + 1, j) / 4.0f;
+                    iColor += getTextureColor(a, i + 1, j + 1) / 4.0f;
+                    ndata [((i/2) + (j/2) * (a.width/2)) * a.channels] = (unsigned char) (iColor.r * 256);//red
+                    ndata [((i/2) + (j/2) * (a.width/2)) * a.channels + 1] = (unsigned char) (iColor.g * 256);//green
+                    ndata [((i/2) + (j/2) * (a.width/2)) * a.channels + 2] = (unsigned char) (iColor.b * 256);//blue
+
+                    if(((i/2) + (j/2) * (a.width/2)) * a.channels + 2 > ((a.width * a.height)/4) * a.channels){
+                        std::cout << "Nothing good\n\n\n";
+                    }
+                }
+            }
+
+            TextureStruct r;
+            r.data = ndata;
+            r.width = a.width/2;
+            r.height = a.height/2;
+            r.channels = a.channels;
+            r.ID = 0;
+            r.addres = 0;
+            r.mmLevel = a.mmLevel + 1;
+
+            return r;
+        }
+
+
+        // To-do: generate mipmaps
+        void generateMipamaps(){
+            if (this->textureImg.width != this->textureImg.height){
+                std::cout << "Error: Try to import a not quadratic texture\n\n";
+                exit(EXIT_FAILURE);
+            }
+            if (!(isPow2(this->textureImg.width))){
+                std::cout << "Error: texture need to have a width represented in power of 2\n\n";
+                exit(EXIT_FAILURE);
+            }
+            if (this->textureImg.width <= 16){
+                std::cout << "Error: texture need to have a width bigger then 16\n\n";
+                exit(EXIT_FAILURE);
+            }
+            this->tmmp.levels = 1;
+            this->tmmp.lastLevelWidth = this->textureImg.width;
+            this->tmmp.mmt.push_back(this->textureImg);
+            
+
+            while(this->tmmp.lastLevelWidth > 16){// To-Do: Change comparsion if needed 
+                this->tmmp.mmt.push_back(newMipmapLevel(this->tmmp.mmt.back()));
+                this->tmmp.levels++;
+                this->tmmp.lastLevelWidth = this->tmmp.mmt.back().width;
+            }
+        }
 
 
 
@@ -210,6 +284,20 @@ namespace C2GL{
             unsigned char r = textureImg.data[(w + h * textureImg.width) * textureImg.channels];
             unsigned char g = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 1];
             unsigned char b = textureImg.data[(w + h * textureImg.width) * textureImg.channels + 2];
+
+            return glm::vec4( (float)r / 256, (float)g / 256, (float)b / 256, 1.0f);
+        }
+
+        glm::vec4 getTextureColor(TextureStruct a, int w, int h){
+            // Make clamp to guarantee value in range 0 to w or h
+            if(w >= a.width) w = a.width -1;
+            if(w < 0) w = 0;
+            if(h >= a.height) h = a.height -1;
+            if(h < 0) h = 0;
+
+            unsigned char r = a.data[(w + h * a.width) * a.channels];
+            unsigned char g = a.data[(w + h * a.width) * a.channels + 1];
+            unsigned char b = a.data[(w + h * a.width) * a.channels + 2];
 
             return glm::vec4( (float)r / 256, (float)g / 256, (float)b / 256, 1.0f);
         }
@@ -245,9 +333,9 @@ namespace C2GL{
                 glm::vec4 v3Color = glm::mix(v1Color, v2Color, deltaT);
                 return v3Color;
             }else{
-                w = (textureImg.width -1) * s;
-                h = (textureImg.height -1) * t;
-                return getTextureColor(w, h);
+                w = (this->tmmp.mmt.back().width -1) * s;
+                h = (this->tmmp.mmt.back().height -1) * t;
+                return getTextureColor(this->tmmp.mmt.back(), w, h);
             }
         }
 
