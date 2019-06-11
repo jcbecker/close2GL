@@ -260,7 +260,7 @@ namespace C2GL{
                 std::cout << "Error: texture need to have a width bigger then 16\n\n";
                 exit(EXIT_FAILURE);
             }
-            this->tmmp.levels = 1;
+            this->tmmp.levels = 0;
             this->tmmp.lastLevelWidth = this->textureImg.width;
             this->tmmp.mmt.push_back(this->textureImg);
             
@@ -304,7 +304,7 @@ namespace C2GL{
 
         // Recive a float s, t both in {0.0, 1.0} and return a color of texture
         // in coordinates of this s, t proportion
-        glm::vec4 getTextureProportion(float s, float t){
+        glm::vec4 getTextureProportion(float s, float t, float level){
             s = glm::clamp(s, 0.0f, 1.0f);
             t = glm::clamp(t, 0.0f, 1.0f);
 
@@ -333,9 +333,62 @@ namespace C2GL{
                 glm::vec4 v3Color = glm::mix(v1Color, v2Color, deltaT);
                 return v3Color;
             }else{
-                w = (this->tmmp.mmt.back().width -1) * s;
-                h = (this->tmmp.mmt.back().height -1) * t;
-                return getTextureColor(this->tmmp.mmt.back(), w, h);
+                int levela = 0, levelb = 0;
+                TextureStruct texa, texb;
+                float ms, mt, deltaS, deltaT, deltaMM;
+                glm::vec4 aColor, bColor, cColor, dColor, v1Color, v2Color, v3Colora, v3Colorb;
+
+                levela = (int)level;
+                deltaMM = levela - level;
+                glm::clamp(deltaMM, 0.0f, 1.0f);
+
+                if (levela < 0) levela = 0;
+                if (levela > this->tmmp.mmt.back().mmLevel) levela = this->tmmp.mmt.back().mmLevel;
+
+                levelb = levela + 1;
+                if (levelb > this->tmmp.mmt.back().mmLevel) levelb = this->tmmp.mmt.back().mmLevel;
+
+                for (int i = 0; i < this->tmmp.mmt.size(); i++){
+                    if(levela == this->tmmp.mmt[i].mmLevel){
+                        texa = this->tmmp.mmt[i];
+                    }
+                    if(levelb == this->tmmp.mmt[i].mmLevel){
+                        texb = this->tmmp.mmt[i];
+                    }
+                }
+
+                ms = (texa.width -1) * s;
+                mt = (texa.height -1) * t;
+                w = ms;
+                h = mt;
+                deltaS = ms - (float) w;
+                deltaT = mt - (float) h;
+                aColor = getTextureColor(texa, w, h);
+                bColor = getTextureColor(texa, w + 1, h);
+                cColor = getTextureColor(texa, w, h + 1);
+                dColor = getTextureColor(texa, w + 1, h + 1);
+
+                v1Color = glm::mix(aColor, bColor, deltaS);
+                v2Color = glm::mix(cColor, dColor, deltaS);
+                v3Colora = glm::mix(v1Color, v2Color, deltaT);
+
+
+                ms = (texb.width -1) * s;
+                mt = (texb.height -1) * t;
+                w = ms;
+                h = mt;
+                deltaS = ms - (float) w;
+                deltaT = mt - (float) h;
+                aColor = getTextureColor(texb, w, h);
+                bColor = getTextureColor(texb, w + 1, h);
+                cColor = getTextureColor(texb, w, h + 1);
+                dColor = getTextureColor(texb, w + 1, h + 1);
+
+                v1Color = glm::mix(aColor, bColor, deltaS);
+                v2Color = glm::mix(cColor, dColor, deltaS);
+                v3Colorb = glm::mix(v1Color, v2Color, deltaT);
+
+                return glm::mix(v3Colorb, v3Colora, deltaMM);
             }
         }
 
@@ -524,6 +577,7 @@ namespace C2GL{
             if (v1.Position.y > v2.Position.y) std::swap(v1, v2);
             
             int total_height = v2.Position.y - v0.Position.y;
+            float total_width = glm::max(glm::max(v0.Position.x, v1.Position.x), v2.Position.x) - glm::min(glm::min(v0.Position.x, v1.Position.x), v2.Position.x);
 
             for (int i=0; i<total_height; i++) {
                 bool second_half = i > v1.Position.y-v0.Position.y || v1.Position.y==v0.Position.y;
@@ -569,6 +623,7 @@ namespace C2GL{
 
                     float ns;
                     float nt;
+                    float leveldes;
                     if(this->perspecCorection){
                         wp = glm::vec3(wp.x / v0.w, wp.y / v1.w, wp.z / v2.w);
 				        wp = wp / (wp.x + wp.y + wp.z);
@@ -579,7 +634,21 @@ namespace C2GL{
                         ns = v0.TexCoords.s * wp.x + v1.TexCoords.s * wp.y + v2.TexCoords.s * wp.z;
                         nt = v0.TexCoords.t * wp.x + v1.TexCoords.t * wp.y + v2.TexCoords.t * wp.z;
                         
-                        pColor = getTextureProportion(ns, nt);
+                        if (filteringOfChoice == TRILINEAR){
+                            float stx, sty;
+                            stx = (256.0f/total_width) * (256.0f/total_width) + (256.0f/total_width) * (256.0f/total_width);
+                            sty = (256.0f/total_height) * (256.0f/total_height) + (256.0f/total_height) * (256.0f/total_height);
+                            stx = sqrt(stx);
+                            sty = sqrt(sty);
+
+
+                            leveldes = (float) glm::log2(glm::max(stx, sty));
+                            // std::cout << "level: " << leveldes << "\n"; 
+                        }else{
+                            leveldes = 0;
+                        }
+
+                        pColor = getTextureProportion(ns, nt, leveldes);
                     }else{
                         pColor = v0.Color * wp.x + v1.Color * wp.y + v2.Color * wp.z;
 
