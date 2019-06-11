@@ -636,8 +636,8 @@ namespace C2GL{
                         
                         if (filteringOfChoice == TRILINEAR){
                             float stx, sty;
-                            stx = (256.0f/total_width) * (256.0f/total_width) + (256.0f/total_width) * (256.0f/total_width);
-                            sty = (256.0f/total_height) * (256.0f/total_height) + (256.0f/total_height) * (256.0f/total_height);
+                            stx = ((256.0f * ns)/total_width) * ((256.0f * ns)/total_width) + ((256.0f * nt)/total_width) * ((256.0f * nt)/total_width);
+                            sty = ((256.0f * ns)/total_height) * ((256.0f * ns)/total_height) + ((256.0f * nt)/total_height) * ((256.0f * nt)/total_height);
                             stx = sqrt(stx);
                             sty = sqrt(sty);
 
