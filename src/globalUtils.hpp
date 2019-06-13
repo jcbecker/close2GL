@@ -27,6 +27,7 @@ struct InRasterizerVertex {
     glm::vec3 OriginalPos;
     glm::vec2 TexCoords;
     float w;
+    glm::vec3 LColor;
 };
 
 struct TextureStruct{

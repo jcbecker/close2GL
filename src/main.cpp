@@ -138,8 +138,8 @@ int main(){
     // Invert texture load y orientation
     stbi_set_flip_vertically_on_load(true);
     // Load Textures
-    TextureStruct mandrilTexture = loadTextureFile("../assets/textures/checker_8x8.jpg");
-    // TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
+    // TextureStruct mandrilTexture = loadTextureFile("../assets/textures/checker_8x8.jpg");
+    TextureStruct mandrilTexture = loadTextureFile("../assets/textures/mandrill_256.jpg");
 
     mandrilTexture.addres = GL_TEXTURE0;
     

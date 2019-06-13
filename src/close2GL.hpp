@@ -265,7 +265,8 @@ namespace C2GL{
             this->tmmp.mmt.push_back(this->textureImg);
             
 
-            while(this->tmmp.lastLevelWidth > 16){// To-Do: Change comparsion if needed 
+            // Change comparsion if needed 
+            while(this->tmmp.lastLevelWidth > 16){
                 this->tmmp.mmt.push_back(newMipmapLevel(this->tmmp.mmt.back()));
                 this->tmmp.levels++;
                 this->tmmp.lastLevelWidth = this->tmmp.mmt.back().width;
@@ -495,9 +496,7 @@ namespace C2GL{
                 float spec = glm::pow(glm::max(glm::dot(viewDir, reflectDir), 0.0f), 32);
                 glm::vec3 specular = specularStrength * spec * this->lightColor;
 
-                glm::vec3 LightingColor = ambient + diffuse + specular;
-
-                v.Color = glm::vec4(LightingColor, 1.0f) * v.Color;
+                v.LColor = ambient + diffuse + specular;
             }
             
             return v;
@@ -649,8 +648,14 @@ namespace C2GL{
                         }
 
                         pColor = getTextureProportion(ns, nt, leveldes);
+                        if(this->useLight){
+                            pColor = pColor * glm::vec4(v0.LColor * wp.x + v1.LColor * wp.y + v2.LColor * wp.z, 1.0f);
+                        }
                     }else{
                         pColor = v0.Color * wp.x + v1.Color * wp.y + v2.Color * wp.z;
+                        if(this->useLight){
+                            pColor = pColor * glm::vec4(v0.LColor * wp.x + v1.LColor * wp.y + v2.LColor * wp.z, 1.0f);
+                        }
 
                     }
 
