@@ -753,7 +753,6 @@ TextureStruct loadTextureFile(const char* path){
 }
 
 TextureStruct genBindTexture(TextureStruct st){
-    //to-do selectables Filter options
     glGenTextures(1, &st.ID);
     glBindTexture(GL_TEXTURE_2D, st.ID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
     // set the texture wrapping parameters
@@ -776,7 +775,6 @@ TextureStruct genBindTexture(TextureStruct st){
 }
 
 TextureStruct refreshTexture(TextureStruct st, GLenum f){
-    //to-do selectables Filter options
     glGenTextures(1, &st.ID);
     glBindTexture(GL_TEXTURE_2D, st.ID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
     // set the texture wrapping parameters

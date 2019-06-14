@@ -245,8 +245,6 @@ namespace C2GL{
             return r;
         }
 
-
-        // To-do: generate mipmaps
         void generateMipamaps(){
             if (this->textureImg.width != this->textureImg.height){
                 std::cout << "Error: Try to import a not quadratic texture\n\n";
@@ -524,7 +522,6 @@ namespace C2GL{
 
 
         void rasterizeTriangle(){
-            // Sorting vertices by height
             InRasterizerVertex v0, v1, v2;
 
             v0.Position = verticeStack[0].Position;
@@ -570,7 +567,7 @@ namespace C2GL{
                 v2.w = (nmvp * glm::vec4(v2.OriginalPos, 1.0f)).w;
             }
             
-
+            // Sorting vertices by height
             if (v0.Position.y > v1.Position.y) std::swap(v0, v1);
             if (v0.Position.y > v2.Position.y) std::swap(v0, v2);
             if (v1.Position.y > v2.Position.y) std::swap(v1, v2);
@@ -615,11 +612,7 @@ namespace C2GL{
                     wp = barWeights(v0.Position, v1.Position, v2.Position, glm::vec2(Px, Py), dem);
                     zFragment = v0.Position.z * wp.x + v1.Position.z * wp.y + v2.Position.z * wp.z;
                     
-                    
                     glm::vec4 pColor;
-
-                    // Debug begin
-
                     float ns;
                     float nt;
                     float leveldes;
@@ -627,7 +620,6 @@ namespace C2GL{
                         wp = glm::vec3(wp.x / v0.w, wp.y / v1.w, wp.z / v2.w);
 				        wp = wp / (wp.x + wp.y + wp.z);
                     }
-                    // Debug end
 
                     if(useTexturesFlag && hasTextureFlag){
                         ns = v0.TexCoords.s * wp.x + v1.TexCoords.s * wp.y + v2.TexCoords.s * wp.z;
@@ -642,7 +634,6 @@ namespace C2GL{
 
 
                             leveldes = (float) glm::log2(glm::max(stx, sty));
-                            // std::cout << "level: " << leveldes << "\n"; 
                         }else{
                             leveldes = 0;
                         }
@@ -659,12 +650,9 @@ namespace C2GL{
 
                     }
 
-                    // std::cout << "Debug: zFragment and zWheight" << zFragment << " and " << v0.Position.z * wp.x + v1.Position.z * wp.y + v2.Position.z * wp.z << ":\n\n";
-                    
                     if(getPixelDeph(pix, piy) > zFragment){
                         setPixelDeph(pix, piy, zFragment);
                         setPixelColor(pix, piy,  pColor);
-                        // setPixelColor(pix, piy,  glm::vec4(zFragment, zFragment, zFragment, 1.0f)); //Show Z-Buffer
                     }
                 }
             }
